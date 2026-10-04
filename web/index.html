@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>TLK ASCII</title>
+  <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Palettes, runes, braille, card suits, blackletter titles, PNG/SVG/HTML/video export. Free, private, in your browser or as a Windows app.">
+  <meta name="theme-color" content="#0d0a08">
+  <meta property="og:title" content="TLK ASCII">
+  <meta property="og:description" content="Image, video and text to glowing ASCII art. Free and private.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://talkdedsec.github.io/tlk-ascii/icons/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="icons/icon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icons/icon-64.png" alt="" width="28" height="28">
+      <span class="brand-name">TLK ASCII</span>
+      <span class="brand-tag" data-i18n="tagline"></span>
+    </div>
+    <nav class="actions" aria-label="Main">
+      <button type="button" class="btn" id="btn-open" data-i18n-title="openHint">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2h9A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></svg>
+        <span data-i18n="open"></span>
+      </button>
+      <button type="button" class="btn" id="btn-webcam" data-i18n-title="webcam">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm12 4 5-3v8l-5-3z"/></svg>
+        <span data-i18n="webcam"></span>
+      </button>
+      <button type="button" class="btn" id="btn-text" data-i18n-title="text">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v3h-2V7h-4v10h2v2H9v-2h2V7H7v1H5z"/></svg>
+        <span data-i18n="text"></span>
+      </button>
+      <button type="button" class="btn" id="btn-demos" data-i18n-title="demos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>
+        <span data-i18n="demos"></span>
+      </button>
+    </nav>
+    <div class="actions right">
+      <button type="button" class="btn primary" id="btn-png">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v9l3-3 1.4 1.4L12 16.8l-5.4-5.4L8 10l3 3zM5 18h14v2H5z"/></svg>
+        <span data-i18n="png"></span>
+      </button>
+      <a class="btn web-only" id="download-link" href="#" target="_blank" rel="noopener" data-i18n-title="downloadApp">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5l8-1.2v7.7H3zm9-1.3L21 2.5v9H12zM3 12.5h8v7.7L3 19zm9 0h9v9l-9-1.3z"/></svg>
+        <span>Windows</span>
+      </a>
+      <label class="lang">
+        <span class="sr" data-i18n="language"></span>
+        <select id="lang">
+          <option value="en">EN</option>
+          <option value="tr">TR</option>
+        </select>
+      </label>
+      <button type="button" class="btn icon" id="btn-about" data-i18n-title="about">?</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="stage busy" id="stage" aria-label="Preview">
+      <div class="viewport" id="viewport">
+        <canvas id="out" width="1" height="1"></canvas>
+      </div>
+      <div class="empty-state">
+        <h1 data-i18n="emptyTitle"></h1>
+        <p data-i18n="emptyBody"></p>
+        <div class="row-btns">
+          <button type="button" class="btn primary" id="btn-open-empty"><span data-i18n="open"></span></button>
+          <button type="button" class="btn" id="btn-demos-empty"><span data-i18n="pickDemo"></span></button>
+        </div>
+      </div>
+      <div class="drop-overlay" aria-hidden="true">
+        <strong data-i18n="dropTitle"></strong>
+        <span data-i18n="dropBody"></span>
+      </div>
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="rec-badge" id="rec-badge" aria-live="polite"></div>
+      <footer class="statusbar">
+        <button type="button" class="btn icon small" id="btn-play" hidden>❚❚</button>
+        <span id="status-size"></span>
+        <span class="muted" id="status-ms"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn icon small" id="zoom-out" data-i18n-title="zoomOut">−</button>
+        <button type="button" class="btn small mono" id="zoom-label" data-i18n-title="actual">100%</button>
+        <button type="button" class="btn icon small" id="zoom-in" data-i18n-title="zoomIn">+</button>
+        <button type="button" class="btn small" id="zoom-fit" data-i18n-title="fit">⤢</button>
+      </footer>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="Settings"></aside>
+  </main>
+
+  <input type="file" id="file" accept="image/*,video/*" hidden>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="dlg-demos" class="dialog wide">
+    <header>
+      <h2 data-i18n="demosTitle"></h2>
+      <button type="button" class="btn icon" data-close data-i18n-title="close">×</button>
+    </header>
+    <p class="muted" data-i18n="demosBody"></p>
+    <div class="demo-grid" id="demo-grid"></div>
+  </dialog>
+
+  <dialog id="dlg-about" class="dialog">
+    <header>
+      <h2 data-i18n="aboutTitle"></h2>
+      <button type="button" class="btn icon" data-close data-i18n-title="close">×</button>
+    </header>
+    <p data-i18n="aboutBody"></p>
+    <h3 data-i18n="shortcuts"></h3>
+    <dl class="keys">
+      <dt><kbd>Ctrl</kbd> <kbd>O</kbd></dt><dd data-i18n="kOpen"></dd>
+      <dt><kbd>Ctrl</kbd> <kbd>S</kbd></dt><dd data-i18n="kSave"></dd>
+      <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd></dt><dd data-i18n="kCopy"></dd>
+      <dt><kbd>F</kbd></dt><dd data-i18n="kFit"></dd>
+      <dt><kbd>Space</kbd></dt><dd data-i18n="kPlay"></dd>
+      <dt><kbd>D</kbd></dt><dd data-i18n="kDemos"></dd>
+    </dl>
+    <p class="muted small" data-i18n="aboutCredits"></p>
+    <p><a id="repo-link" href="#" target="_blank" rel="noopener" data-i18n="source"></a> · MIT</p>
+  </dialog>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/charsets.js"></script>
+  <script src="js/palettes.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/sources.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

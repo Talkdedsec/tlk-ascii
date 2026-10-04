@@ -1,0 +1,64 @@
+{
+  "name": "tlk-ascii",
+  "productName": "TLK ASCII",
+  "version": "1.0.0",
+  "description": "Image, video, webcam and text to glowing ASCII art. Palettes, runes, braille, blackletter titles; PNG, SVG, HTML, TXT and video export.",
+  "license": "MIT",
+  "author": "Talkdedsec",
+  "homepage": "https://talkdedsec.github.io/tlk-ascii/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Talkdedsec/tlk-ascii.git"
+  },
+  "private": true,
+  "main": "desktop/main.js",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "start": "electron .",
+    "test": "node scripts/smoke.mjs",
+    "demos": "node scripts/render-demos.mjs",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "build": {
+    "appId": "com.talkdedsec.tlkascii",
+    "productName": "TLK ASCII",
+    "copyright": "Copyright (c) 2026 Talkdedsec",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "desktop/**",
+      "web/**",
+      "package.json",
+      "LICENSE"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "portable": {
+      "artifactName": "tlk-ascii-${version}-portable.exe"
+    },
+    "nsis": {
+      "artifactName": "tlk-ascii-${version}-setup.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "TLK ASCII"
+    },
+    "electronLanguages": [
+      "en-US",
+      "tr"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "playwright-core": "^1.63.0"
+  }
+}
