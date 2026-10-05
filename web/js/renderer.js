@@ -1,11 +1,14 @@
 /* The ASCII renderer.
 
    Pipeline per frame:
-   1. the source is drawn into a small canvas, one pixel per cell;
-   2. every cell gets a brightness, a glyph and a colour;
-   3. glyphs are stamped from a pre-rendered white atlas;
+   1. the source is framed (aspect, zoom, pan, rotation) into a work canvas
+      and sampled down to one pixel per cell;
+   2. every cell gets a tone; tones are quantised to glyph levels, optionally
+      with dithering; edge mode replaces strong edges with line glyphs;
+   3. glyphs are stamped from pre-rendered white atlases;
    4. one "source-in" pass paints each cell with its colour;
-   5. glow, chromatic aberration, title, scanlines and vignette go on top. */
+   5. glow, chromatic aberration, title, scanlines, vignette, grain and CRT
+      curvature go on top. */
 (function (GF) {
   'use strict';
 
@@ -26,6 +29,14 @@
     const f = GF.FONTS.find((x) => x.id === id) || GF.FONTS[0];
     return f.family + ', ' + FALLBACK_STACK;
   };
+
+  /* Edge glyphs in orientation order: vertical, rising, horizontal, falling. */
+  GF.EDGE_SETS = {
+    ascii: ['|', '/', '-', '\\'],
+    box: ['│', '╱', '─', '╲']
+  };
+
+  const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
   function mk(w, h) {
     const c = document.createElement('canvas');
@@ -49,14 +60,81 @@
     return v < a ? a : v > b ? b : v;
   }
 
+  function rotation(s) {
+    return (((Math.round(s.rotate || 0) / 90) * 90) % 360 + 360) % 360;
+  }
+
+  /* Width / height of the output frame. */
+  GF.frameAspect = function (s, srcW, srcH) {
+    if (s.frame && s.frame !== 'source') {
+      const [a, b] = String(s.frame).split(':').map(Number);
+      if (a > 0 && b > 0) return a / b;
+    }
+    const r = rotation(s);
+    return r === 90 || r === 270 ? srcH / srcW : srcW / srcH;
+  };
+
+  /* Error-diffusion and ordered dithering on the per-cell tone grid.
+     Cells with tone < 0 are empty and take no part. */
+  function quantize(tone, out, cols, rows, depth, mode) {
+    const n = depth - 1;
+    if (mode === 'floyd' || mode === 'atkinson') {
+      const buf = Float32Array.from(tone);
+      const add = (x, y, e) => {
+        if (x < 0 || x >= cols || y >= rows) return;
+        const j = y * cols + x;
+        if (tone[j] >= 0) buf[j] += e;
+      };
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = y * cols + x;
+          if (tone[i] < 0) continue;
+          const v = buf[i];
+          const q = clamp(Math.round(v * n), 0, n);
+          out[i] = q;
+          const err = v - q / n;
+          if (mode === 'floyd') {
+            add(x + 1, y, (err * 7) / 16);
+            add(x - 1, y + 1, (err * 3) / 16);
+            add(x, y + 1, (err * 5) / 16);
+            add(x + 1, y + 1, err / 16);
+          } else {
+            const e = err / 8;
+            add(x + 1, y, e);
+            add(x + 2, y, e);
+            add(x - 1, y + 1, e);
+            add(x, y + 1, e);
+            add(x + 1, y + 1, e);
+            add(x, y + 2, e);
+          }
+        }
+      }
+      return;
+    }
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = y * cols + x;
+        const v = tone[i];
+        if (v < 0) continue;
+        out[i] = mode === 'bayer'
+          ? clamp(Math.floor(v * n + BAYER4[(y & 3) * 4 + (x & 3)]), 0, n)
+          : Math.min(n, Math.floor(v * depth));
+      }
+    }
+  }
+
   class Renderer {
     constructor() {
       this.comp = mk();
       this.sample = mk();
+      this.sample2 = mk();
       this.glyph = mk();
       this.colorMap = mk();
       this.tint = mk();
       this.blur = mk();
+      this.warp = mk();
+      this.warp2 = mk();
+      this.noise = null;
       this.atlasCache = new Map();
       this.lutCache = new Map();
       this.last = null;
@@ -73,24 +151,38 @@
       let l = this.lutCache.get(key);
       if (!l) {
         l = GF.gradientLUT(stops);
+        if (this.lutCache.size > 40) this.lutCache.clear();
         this.lutCache.set(key, l);
       }
       return l;
     }
 
-    /* Renders every distinct glyph once, white on transparent, then measures
-       its ink coverage so the ramp can be ordered from sparse to dense. */
-    atlas(chars, fontId, bold, fontSize, cw, ch) {
-      const key = [chars, fontId, bold ? 1 : 0, fontSize, cw, ch].join('|');
+    /* Renders every glyph once, white on transparent, and measures its ink.
+       opts.sort orders the cells sparse to dense; opts.sizes renders a single
+       glyph at that many sizes (halftone). */
+    atlas(chars, fontId, bold, fontSize, cw, ch, opts) {
+      opts = opts || {};
+      const key = [chars, fontId, bold ? 1 : 0, fontSize, cw, ch, opts.sizes || 0, opts.sort === false ? 0 : 1].join('|');
       const hit = this.atlasCache.get(key);
       if (hit) return hit;
 
-      const glyphs = Array.from(new Set(Array.from(chars)));
-      if (!glyphs.length) glyphs.push('#');
+      let glyphs;
+      let scales;
+      if (opts.sizes) {
+        const chr = Array.from(chars)[0] || '●';
+        glyphs = [];
+        scales = [];
+        for (let k = 0; k < opts.sizes; k++) {
+          glyphs.push(chr);
+          scales.push(k === 0 ? 0 : Math.sqrt(k / (opts.sizes - 1)) * 1.12);
+        }
+      } else {
+        glyphs = Array.from(new Set(Array.from(chars)));
+        if (!glyphs.length) glyphs.push('#');
+      }
       const perRow = Math.ceil(Math.sqrt(glyphs.length));
       const canvas = mk(perRow * cw, Math.ceil(glyphs.length / perRow) * ch);
       const g = canvas.getContext('2d', { willReadFrequently: true });
-      g.font = (bold ? '700 ' : '400 ') + fontSize + 'px ' + GF.fontStack(fontId);
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.fillStyle = '#fff';
@@ -98,13 +190,17 @@
       const cells = glyphs.map((chr, i) => {
         const x = (i % perRow) * cw;
         const y = Math.floor(i / perRow) * ch;
-        g.save();
-        g.beginPath();
-        g.rect(x, y, cw, ch);
-        g.clip();
-        g.fillText(chr, x + cw / 2, y + ch / 2 + fontSize * 0.04);
-        g.restore();
-        return { chr, x, y, density: 0 };
+        const px = scales ? fontSize * scales[i] : fontSize;
+        if (px >= 1) {
+          g.font = (bold ? '700 ' : '400 ') + Math.max(1, Math.round(px)) + 'px ' + GF.fontStack(fontId);
+          g.save();
+          g.beginPath();
+          g.rect(x, y, cw, ch);
+          g.clip();
+          g.fillText(chr, x + cw / 2, y + ch / 2 + px * 0.04);
+          g.restore();
+        }
+        return { chr: scales && px < 1 ? ' ' : chr, x, y, density: 0, canvas };
       });
 
       const data = g.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -117,10 +213,10 @@
         }
         c.density = sum / area;
       }
-      cells.sort((a, b) => a.density - b.density);
+      if (opts.sort !== false && !opts.sizes) cells.sort((a, b) => a.density - b.density);
 
       const atlas = { canvas, cells };
-      if (this.atlasCache.size > 24) this.atlasCache.delete(this.atlasCache.keys().next().value);
+      if (this.atlasCache.size > 32) this.atlasCache.delete(this.atlasCache.keys().next().value);
       this.atlasCache.set(key, atlas);
       return atlas;
     }
@@ -130,10 +226,39 @@
       const ch = Math.max(2, Math.round(s.cell * scale));
       const cw = s.grid === 'square' ? ch : Math.max(2, Math.round(s.cell * 0.6 * scale));
       const W0 = Math.max(32, Math.round(s.outWidth * scale));
-      const H0 = Math.max(32, Math.round((W0 * srcH) / srcW));
+      const H0 = Math.max(32, Math.round(W0 / GF.frameAspect(s, srcW, srcH)));
       const cols = Math.max(1, Math.floor(W0 / cw));
       const rows = Math.max(1, Math.floor(H0 / ch));
       return { cw, ch, cols, rows, W: cols * cw, H: rows * ch };
+    }
+
+    /* Draws the source into the work canvas: cover-fit, then zoom, pan,
+       rotation and mirror. */
+    compose(src, s, w, h) {
+      size(this.comp, w, h);
+      const cc = this.comp.getContext('2d');
+      cc.setTransform(1, 0, 0, 1, 0, 0);
+      cc.globalCompositeOperation = 'source-over';
+      cc.globalAlpha = 1;
+      cc.clearRect(0, 0, w, h);
+      cc.imageSmoothingEnabled = true;
+      cc.imageSmoothingQuality = 'high';
+      const r = rotation(s);
+      const swap = r === 90 || r === 270;
+      const sw = swap ? src.height : src.width;
+      const sh = swap ? src.width : src.height;
+      const cover = Math.max(w / sw, h / sh) * clamp(s.frameZoom || 1, 1, 8);
+      const dw = sw * cover;
+      const dh = sh * cover;
+      const cx = w / 2 - (clamp(s.frameX || 0, -100, 100) / 100) * Math.max(0, (dw - w) / 2);
+      const cy = h / 2 - (clamp(s.frameY || 0, -100, 100) / 100) * Math.max(0, (dh - h) / 2);
+      cc.save();
+      cc.translate(cx, cy);
+      if (r) cc.rotate((r * Math.PI) / 180);
+      if (s.flipX) cc.scale(swap ? 1 : -1, swap ? -1 : 1);
+      cc.drawImage(src.el, (-src.width * cover) / 2, (-src.height * cover) / 2, src.width * cover, src.height * cover);
+      cc.restore();
+      return cc;
     }
 
     render(src, s, target, opt) {
@@ -145,26 +270,28 @@
 
       const geo = this.geometry(src.width, src.height, s, scale);
       const { cw, ch, cols, rows, W, H } = geo;
+      const total = cols * rows;
 
-      /* 1. compose and sample */
-      const k = 4;
-      const compW = Math.min(4096, cols * k);
-      const compH = Math.min(4096, rows * k);
-      size(this.comp, compW, compH);
-      const cc = this.comp.getContext('2d');
-      cc.globalCompositeOperation = 'source-over';
-      cc.clearRect(0, 0, compW, compH);
-      cc.imageSmoothingEnabled = true;
-      cc.imageSmoothingQuality = 'high';
+      /* 1. frame, sample */
+      const compW = Math.min(4096, cols * 4);
+      const compH = Math.min(4096, rows * 4);
+      let cc;
       try {
-        cc.drawImage(src.el, 0, 0, compW, compH);
+        cc = this.compose(src, s, compW, compH);
       } catch (e) {
         return null;
       }
+      if (opt.before) {
+        size(opt.before, W, H);
+        const bc = opt.before.getContext('2d');
+        bc.imageSmoothingQuality = 'high';
+        bc.clearRect(0, 0, W, H);
+        bc.drawImage(this.comp, 0, 0, W, H);
+      }
       if (s.title && s.titleMode === 'baked') {
-        /* Drawn into the source, so it has to survive "invert" as bright. */
+        /* drawn into the source, so it has to come out bright after "invert" */
+        const flip = (hex) => '#' + GF.hexToRgb(hex).map((v) => (255 - v).toString(16).padStart(2, '0')).join('');
         let c = s.colorMode === 'source' ? s.titleColor : '#ffffff';
-        const flip = (h) => '#' + GF.hexToRgb(h).map((v) => (255 - v).toString(16).padStart(2, '0')).join('');
         if (s.invert) c = flip(c);
         this.drawTitle(cc, compW, compH, s, c, false, s.invert ? '#ffffff' : '#000000');
       }
@@ -177,70 +304,148 @@
       sc.drawImage(this.comp, 0, 0, cols, rows);
       const d = sc.getImageData(0, 0, cols, rows).data;
 
-      /* 2. glyph ramp */
-      const chars = s.inject && s.inject.trim() ? s.inject : GF.charsetChars(s.charSet);
+      /* 2. glyph sets */
+      const mode = s.mode === 'edges' || s.mode === 'halftone' ? s.mode : 'ascii';
+      const depth = clamp(Math.round(s.depth), 2, 64);
       const base = s.grid === 'square' ? ch * 0.86 : ch * 0.92;
       const fontSize = Math.max(2, Math.round(base * (s.glyphScale / 100)));
-      const atlas = this.atlas(chars, s.glyphFont, s.bold, fontSize, cw, ch);
-      const ramp = atlas.cells;
+      const inject = s.inject && s.inject.trim() ? s.inject : '';
+      let ramp;
+      if (mode === 'halftone') {
+        const chr = Array.from(inject.trim() || s.halftoneChar || '●')[0];
+        ramp = this.atlas(chr, s.glyphFont, s.bold, fontSize, cw, ch, { sizes: depth }).cells;
+      } else {
+        ramp = this.atlas(inject || GF.charsetChars(s.charSet), s.glyphFont, s.bold, fontSize, cw, ch).cells;
+      }
       const N = ramp.length;
-      const depth = clamp(Math.round(s.depth), 2, 64);
+      const glyphs = ramp.slice();
+      let edgeBase = -1;
+      if (mode === 'edges') {
+        edgeBase = glyphs.length;
+        const set = GF.EDGE_SETS[s.edgeGlyphs] || GF.EDGE_SETS.ascii;
+        glyphs.push(...this.atlas(set.join(''), s.glyphFont, s.bold, fontSize, cw, ch, { sort: false }).cells);
+      }
       const levelIdx = new Int16Array(depth);
-      for (let i = 0; i < depth; i++) levelIdx[i] = Math.round((i * (N - 1)) / (depth - 1));
+      for (let i = 0; i < depth; i++) levelIdx[i] = mode === 'halftone' ? i : Math.round((i * (N - 1)) / (depth - 1));
 
-      /* 3. per-cell brightness, glyph and colour */
+      /* 3a. tone per cell */
       const bright = (s.brightness / 100) * 0.5;
       const cf = s.contrast >= 0 ? 1 + (s.contrast / 100) * 2 : 1 + s.contrast / 100;
       const invGamma = 1 / clamp(s.gamma, 0.1, 5);
       const thr = clamp(s.threshold / 100, 0, 0.99);
+      const tone = new Float32Array(total).fill(-1);
+      const lum = new Float32Array(total);
+      for (let i = 0; i < total; i++) {
+        const p = i * 4;
+        const a = d[p + 3] / 255;
+        const lv = (0.2126 * d[p] + 0.7152 * d[p + 1] + 0.0722 * d[p + 2]) / 255;
+        lum[i] = lv;
+        if (a <= 0.01 && !s.invert) continue;
+        let l = s.invert ? (1 - lv) * a : lv * a;
+        l = (l - 0.5) * cf + 0.5 + bright;
+        if (l <= 0) continue;
+        l = l >= 1 ? 1 : Math.pow(l, invGamma);
+        if (l < thr) continue;
+        tone[i] = (l - thr) / (1 - thr);
+      }
+
+      /* 3b. edges: structure tensor over a 2× grid, binned to four directions */
+      let edgeDir = null;
+      let edgeMag = null;
+      if (mode === 'edges') {
+        const w2 = cols * 2, h2 = rows * 2;
+        size(this.sample2, w2, h2);
+        const s2 = this.sample2.getContext('2d', { willReadFrequently: true });
+        s2.clearRect(0, 0, w2, h2);
+        s2.imageSmoothingEnabled = true;
+        s2.imageSmoothingQuality = 'high';
+        s2.drawImage(this.comp, 0, 0, w2, h2);
+        const d2 = s2.getImageData(0, 0, w2, h2).data;
+        const L = new Float32Array(w2 * h2);
+        for (let i = 0; i < L.length; i++) {
+          const p = i * 4;
+          L[i] = ((0.2126 * d2[p] + 0.7152 * d2[p + 1] + 0.0722 * d2[p + 2]) / 255) * (d2[p + 3] / 255);
+        }
+        const A = new Float32Array(total), B = new Float32Array(total), M = new Float32Array(total);
+        const at = (x, y) => L[clamp(y, 0, h2 - 1) * w2 + clamp(x, 0, w2 - 1)];
+        for (let y = 0; y < h2; y++) {
+          for (let x = 0; x < w2; x++) {
+            const gx = at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1);
+            const gy = at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1);
+            const i = (y >> 1) * cols + (x >> 1);
+            A[i] += gx * gx - gy * gy;
+            B[i] += 2 * gx * gy;
+            M[i] += Math.sqrt(gx * gx + gy * gy);
+          }
+        }
+        const sorted = Float32Array.from(M).sort();
+        const ref = Math.max(1e-3, sorted[Math.floor(sorted.length * 0.98)]);
+        const cut = clamp(s.edgeThreshold / 100, 0.02, 0.98);
+        edgeDir = new Int8Array(total).fill(-1);
+        edgeMag = new Float32Array(total);
+        const q = Math.PI / 4;
+        for (let i = 0; i < total; i++) {
+          const m = Math.min(1, M[i] / ref);
+          if (m < cut) continue;
+          const phi = Math.atan2(B[i], A[i]);
+          edgeDir[i] = Math.abs(phi) <= q ? 0 : phi > q && phi <= 3 * q ? 1 : phi < -q && phi >= -3 * q ? 3 : 2;
+          edgeMag[i] = (m - cut) / (1 - cut);
+        }
+      }
+
+      /* 3c. levels, glyphs and colours */
+      const level = new Int16Array(total).fill(-1);
+      quantize(tone, level, cols, rows, depth, s.dither);
+
       const fade = clamp(s.fade / 100, 0, 1);
       const sat = s.saturation / 100;
-      const mode = s.colorMode;
-      const lut = mode === 'palette' ? this.lut(GF.paletteStops(s.palette)) : null;
+      const colorMode = s.colorMode;
+      const lut = colorMode === 'palette' ? this.lut(GF.paletteStops(s.palette, s)) : null;
       const single = GF.hexToRgb(s.color);
       const speed = s.animSpeed;
       const amount = s.animAmount / 100;
       const tick = Math.floor(time * speed);
       let baseOff = Math.round(s.offset) || 0;
       if (s.anim === 'cycle') baseOff += tick;
+      const fill = mode !== 'edges' || s.edgeFill;
 
-      const total = cols * rows;
       const idx = new Int16Array(total).fill(-1);
       const colors = new Uint8ClampedArray(total * 4);
 
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x;
-          const p = i * 4;
-          const r = d[p], g = d[p + 1], b = d[p + 2], a = d[p + 3] / 255;
-          if (a <= 0.01 && !s.invert) continue;
-          const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-          let l = s.invert ? (1 - lum) * a : lum * a;
-          l = (l - 0.5) * cf + 0.5 + bright;
-          if (l <= 0) continue;
-          l = l >= 1 ? 1 : Math.pow(l, invGamma);
-          if (l < thr) continue;
-          const ln = (l - thr) / (1 - thr);
-
-          let gi = levelIdx[Math.min(depth - 1, Math.floor(ln * depth))];
-          let off = baseOff;
-          if (s.anim === 'flicker') {
-            const h = hash(x, y, tick);
-            if (h < amount) off += 1 + Math.floor(h * 977) % 3;
-          } else if (s.anim === 'wave') {
-            off += Math.round(((Math.sin(x * 0.17 + y * 0.09 - time * speed * 0.5) + 1) / 2) * amount * (N - 1));
+          let t = tone[i];
+          let gi = -1;
+          if (edgeDir && edgeDir[i] >= 0) {
+            gi = edgeBase + edgeDir[i];
+            t = Math.max(t, 0.55 + 0.45 * edgeMag[i]);
+          } else if (t >= 0 && fill) {
+            gi = levelIdx[level[i]];
+            if (mode !== 'halftone') {
+              let off = baseOff;
+              if (s.anim === 'flicker') {
+                const h = hash(x, y, tick);
+                if (h < amount) off += 1 + (Math.floor(h * 977) % 3);
+              } else if (s.anim === 'wave') {
+                off += Math.round(((Math.sin(x * 0.17 + y * 0.09 - time * speed * 0.5) + 1) / 2) * amount * (N - 1));
+              }
+              if (off) gi = (((gi + off) % N) + N) % N;
+            }
+            if (mode === 'edges') t *= 0.6;
           }
-          if (off) gi = (((gi + off) % N) + N) % N;
-          if (ramp[gi].density <= 0) continue;
+          if (gi < 0 || glyphs[gi].density <= 0) continue;
           idx[i] = gi;
 
+          const p = i * 4;
           let cr, cg, cb;
-          if (mode === 'palette') {
-            const li = (ln * 255) | 0;
+          if (colorMode === 'palette') {
+            const li = (clamp(t, 0, 1) * 255) | 0;
             cr = lut[li * 3]; cg = lut[li * 3 + 1]; cb = lut[li * 3 + 2];
-          } else if (mode === 'single') {
+          } else if (colorMode === 'single') {
             cr = single[0]; cg = single[1]; cb = single[2];
           } else {
+            const r = d[p], g = d[p + 1], b = d[p + 2];
             let rr = s.invert ? 255 - r : r;
             let gg = s.invert ? 255 - g : g;
             let bb = s.invert ? 255 - b : b;
@@ -248,13 +453,14 @@
             rr = gray + (rr - gray) * sat;
             gg = gray + (gg - gray) * sat;
             bb = gray + (bb - gray) * sat;
-            const f = clamp((l * 255) / Math.max(gray, 6), 0, 4);
+            const target = (thr + clamp(t, 0, 1) * (1 - thr)) * 255;
+            const f = clamp(target / Math.max(gray, 6), 0, 4);
             cr = rr * f; cg = gg * f; cb = bb * f;
           }
           colors[p] = cr;
           colors[p + 1] = cg;
           colors[p + 2] = cb;
-          colors[p + 3] = (1 - fade + fade * ln) * 255;
+          colors[p + 3] = (1 - fade + fade * clamp(t, 0, 1)) * 255;
         }
       }
 
@@ -264,14 +470,13 @@
       gc.globalCompositeOperation = 'source-over';
       gc.globalAlpha = 1;
       gc.clearRect(0, 0, W, H);
-      const atlasCanvas = atlas.canvas;
       for (let y = 0; y < rows; y++) {
         const py = y * ch;
         for (let x = 0; x < cols; x++) {
           const gi = idx[y * cols + x];
           if (gi < 0) continue;
-          const c = ramp[gi];
-          gc.drawImage(atlasCanvas, c.x, c.y, cw, ch, x * cw, py, cw, ch);
+          const c = glyphs[gi];
+          gc.drawImage(c.canvas, c.x, c.y, cw, ch, x * cw, py, cw, ch);
         }
       }
       size(this.colorMap, cols, rows);
@@ -301,9 +506,12 @@
       if (s.title && s.titleMode !== 'baked') this.drawTitle(o, W, H, s, s.titleColor, true);
       if (s.scanlines > 0) this.drawScanlines(o, W, H, s.scanlines / 100, scale, s.transparent);
       if (s.vignette > 0) this.drawVignette(o, W, H, s.vignette / 100, s.transparent);
+      if (s.grain > 0) this.drawGrain(o, W, H, s.grain / 100, time, scale, s.transparent);
       o.restore();
+      if (s.curvature > 0) this.drawCurvature(target, s.curvature / 100, s.transparent);
 
-      this.last = { cols, rows, cw, ch, W, H, idx, colors, ramp, settings: s };
+      const result = { cols, rows, cw, ch, W, H, idx, colors, glyphs, ramp, settings: s };
+      if (!opt.keepLast) this.last = result;
       return { cols, rows, W, H, ms: performance.now() - t0 };
     }
 
@@ -416,6 +624,78 @@
       o.globalCompositeOperation = transparent ? 'destination-out' : 'source-over';
       o.fillStyle = g;
       o.fillRect(0, 0, W, H);
+      o.restore();
+    }
+
+    /* Film grain from a tiled noise texture, shifted every frame. */
+    drawGrain(o, W, H, amount, time, scale, transparent) {
+      if (!this.noise) {
+        this.noise = mk(192, 192);
+        const nc = this.noise.getContext('2d');
+        const img = nc.createImageData(192, 192);
+        for (let i = 0; i < img.data.length; i += 4) {
+          const v = Math.random() * 255;
+          img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+          img.data[i + 3] = 255;
+        }
+        nc.putImageData(img, 0, 0);
+      }
+      const pat = o.createPattern(this.noise, 'repeat');
+      const t = Math.floor(time * 24);
+      const ox = Math.floor(hash(t, 1, 7) * 192);
+      const oy = Math.floor(hash(t, 2, 9) * 192);
+      if (pat.setTransform) pat.setTransform(new DOMMatrix().translate(ox * scale, oy * scale).scale(Math.max(1, scale)));
+      o.save();
+      o.fillStyle = pat;
+      if (transparent) {
+        o.globalCompositeOperation = 'source-atop';
+        o.globalAlpha = amount * 0.18;
+        o.fillRect(0, 0, W, H);
+      } else {
+        o.globalCompositeOperation = 'overlay';
+        o.globalAlpha = amount * 0.55;
+        o.fillRect(0, 0, W, H);
+        o.globalCompositeOperation = 'screen';
+        o.globalAlpha = amount * 0.07;
+        o.fillRect(0, 0, W, H);
+      }
+      o.restore();
+    }
+
+    /* CRT curvature as a separable warp: rows are squeezed toward the
+       middle near the top and bottom, then columns near the sides. */
+    drawCurvature(target, amount, transparent) {
+      const W = target.width, H = target.height;
+      const k = amount * 0.16;
+      const step = Math.max(1, Math.round(Math.min(W, H) / 400));
+      size(this.warp, W, H);
+      size(this.warp2, W, H);
+      const a = this.warp.getContext('2d');
+      a.globalCompositeOperation = 'source-over';
+      a.clearRect(0, 0, W, H);
+      a.drawImage(target, 0, 0);
+      const b = this.warp2.getContext('2d');
+      b.globalCompositeOperation = 'source-over';
+      b.clearRect(0, 0, W, H);
+      for (let y = 0; y < H; y += step) {
+        const ny = ((y + step / 2) / H) * 2 - 1;
+        const w = W * (1 - k * ny * ny);
+        b.drawImage(this.warp, 0, y, W, step, (W - w) / 2, y, w, step + 0.5);
+      }
+      const o = target.getContext('2d');
+      o.save();
+      o.globalCompositeOperation = 'source-over';
+      o.globalAlpha = 1;
+      o.clearRect(0, 0, W, H);
+      if (!transparent) {
+        o.fillStyle = '#000';
+        o.fillRect(0, 0, W, H);
+      }
+      for (let x = 0; x < W; x += step) {
+        const nx = ((x + step / 2) / W) * 2 - 1;
+        const h = H * (1 - k * nx * nx);
+        o.drawImage(this.warp2, x, 0, step, H, x, (H - h) / 2, step + 0.5, h);
+      }
       o.restore();
     }
   }

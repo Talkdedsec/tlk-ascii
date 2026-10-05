@@ -4,6 +4,18 @@
 
   GF.DEFAULTS = Object.freeze({
     outWidth: 1080,
+    frame: 'source',
+    frameZoom: 1,
+    frameX: 0,
+    frameY: 0,
+    rotate: 0,
+    flipX: false,
+    mode: 'ascii',
+    edgeThreshold: 35,
+    edgeGlyphs: 'ascii',
+    edgeFill: true,
+    halftoneChar: '●',
+    dither: 'none',
     charSet: 'classic/detailed',
     inject: '',
     depth: 24,
@@ -21,6 +33,7 @@
     saturation: 120,
     colorMode: 'palette',
     palette: 'medieval/ember',
+    customStops: '#08080a,#2f4fd8,#ff5ab4,#fff3d6',
     color: '#ff3b1f',
     fade: 55,
     bg: '#000000',
@@ -30,6 +43,8 @@
     chroma: 0,
     scanlines: 0,
     vignette: 25,
+    grain: 0,
+    curvature: 0,
     title: '',
     titleFont: 'unifraktur',
     titleSize: 11,
@@ -46,8 +61,15 @@
     textWeight: 'regular',
     mirror: true,
     pngScale: 2,
-    recSeconds: 6
+    pngTrim: false,
+    recSeconds: 6,
+    gifWidth: 600,
+    gifFps: 15,
+    gifSeconds: 3
   });
+
+  /* Export-only settings: not part of undo history, looks or share links. */
+  GF.EXPORT_KEYS = ['pngScale', 'pngTrim', 'recSeconds', 'gifWidth', 'gifFps', 'gifSeconds'];
 
   const n = (en, tr) => ({ en, tr });
 
@@ -116,7 +138,7 @@
       settings: {
         invert: true, charSet: 'braille/full', cell: 8, depth: 48, palette: 'crt/phosphor',
         contrast: 45, threshold: 38, fade: 40, glow: 100, glowRadius: 6, scanlines: 45, chroma: 1.5,
-        vignette: 55, anim: 'flicker', animAmount: 6, animSpeed: 8
+        vignette: 55, curvature: 45, grain: 18, anim: 'flicker', animAmount: 6, animSpeed: 8
       }
     },
     {
@@ -136,6 +158,35 @@
         text: 'TLK\nASCII', textFont: 'unifraktur', textAspect: '16:9', charSet: 'classic/detailed', cell: 8,
         depth: 24, palette: 'medieval/blood', threshold: 20, fade: 20, glow: 130, glowRadius: 7,
         vignette: 35, anim: 'flicker', animAmount: 8, animSpeed: 7
+      }
+    },
+    {
+      id: 'sketch', name: n('Line sketch', 'Çizgi eskiz'),
+      source: { type: 'image', url: 'demos/helmet.jpg' },
+      credit: 'Close Helmet, c. 1555. The Metropolitan Museum of Art, CC0.',
+      settings: {
+        mode: 'edges', edgeThreshold: 30, edgeFill: true, invert: true, cell: 8, depth: 16,
+        charSet: 'classic/standard', palette: 'crt/ice', contrast: 30, threshold: 34, fade: 30,
+        glow: 90, glowRadius: 6, vignette: 40
+      }
+    },
+    {
+      id: 'halftone', name: n('Colour halftone', 'Renkli yarım ton'),
+      source: { type: 'image', url: 'demos/portrait.jpg' },
+      credit: 'Albrecht Dürer, Self-Portrait at Twenty-Eight, 1500. Public domain.',
+      settings: {
+        mode: 'halftone', grid: 'square', cell: 9, depth: 10, colorMode: 'source', saturation: 160,
+        gamma: 1.8, brightness: 25, contrast: 20, threshold: 3, fade: 0, glow: 45, glowRadius: 5, vignette: 25
+      }
+    },
+    {
+      id: 'bitmap', name: n('One-bit Atkinson', 'Tek bit Atkinson'),
+      source: { type: 'image', url: 'demos/rhino.jpg' },
+      credit: 'Albrecht Dürer, The Rhinoceros, 1515. National Gallery of Art, CC0.',
+      settings: {
+        dither: 'atkinson', depth: 2, charSet: 'blocks/shade', grid: 'square', cell: 5, outWidth: 1200,
+        colorMode: 'single', color: '#e9e4d8', fade: 0, gamma: 1.2, threshold: 0, glow: 25, glowRadius: 3,
+        vignette: 0, grain: 25
       }
     },
     {

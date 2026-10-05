@@ -15,7 +15,7 @@
 
 </div>
 
-TLK ASCII turns pictures, videos, GIFs, your webcam and plain text into ASCII art that glows. Pick from 38 character sets (classic ramps, braille, blocks, card suits, runes, katakana…), 24 colour palettes or the source's own colours, then add bloom, chromatic aberration, scanlines, a blackletter title and motion. Export PNG up to 4×, SVG, HTML, plain text or a video.
+TLK ASCII turns pictures, videos, GIFs, your webcam and plain text into ASCII art that glows. Start from one of 18 looks or build your own: three drawing modes (ASCII, edge lines, halftone), dithering, 38 character sets (classic ramps, braille, blocks, card suits, runes, katakana…), 24 palettes plus your own, glow, CRT curve, scanlines, film grain, a blackletter title and motion. Frame it for any format, compare with the original, undo anything, then export PNG, GIF, video, SVG, HTML or text.
 
 It runs entirely on your device: in the browser through GitHub Pages, or as an offline Windows program. The interface is in **English and Turkish**.
 
@@ -26,13 +26,16 @@ Every demo loads a source and a complete set of settings. Click one to open it i
 | | | | | |
 |:-:|:-:|:-:|:-:|:-:|
 | [![Memento mori](web/demos/previews/skull.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=skull)<br>Memento mori | [![Knight, Death and Devil](web/demos/previews/knight.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=knight)<br>Knight, Death and Devil | [![Runes of the dragon](web/demos/previews/dragon.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=dragon)<br>Runes of the dragon | [![Gilded rhinoceros](web/demos/previews/rhino.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=rhino)<br>Gilded rhinoceros | [![Forged helmet](web/demos/previews/helmet.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=helmet)<br>Forged helmet |
-| [![Self-portrait in colour](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Self-portrait in colour | [![Phosphor Melencolia](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Phosphor Melencolia | [![Living fire](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Living fire (animated) | [![Gothic title](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gothic title | [![Vapour plasma](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Vapour plasma (animated) |
+| [![Self-portrait in colour](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Self-portrait in colour | [![Phosphor Melencolia](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Phosphor Melencolia | [![Line sketch (edges)](web/demos/previews/sketch.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=sketch)<br>Line sketch (edges) | [![Colour halftone](web/demos/previews/halftone.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=halftone)<br>Colour halftone | [![One-bit Atkinson](web/demos/previews/bitmap.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=bitmap)<br>One-bit Atkinson |
+| [![Living fire (animated)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Living fire (animated) | [![Gothic title](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gothic title | [![Vapour plasma (animated)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Vapour plasma (animated) |   |   |
+
+![The TLK ASCII workspace](docs/screenshot.jpg)
 
 ## Start in 10 seconds
 
 1. [Open TLK ASCII](https://talkdedsec.github.io/tlk-ascii/).
 2. Drop an image or video on the page, paste one with <kbd>Ctrl</kbd>+<kbd>V</kbd>, or choose **Demos**.
-3. Adjust the panel on the right, then press **Save PNG**.
+3. Click a look on the right, fine-tune it in the other tabs, then press **Export**.
 
 No login, installation or upload is involved.
 
@@ -40,15 +43,20 @@ No login, installation or upload is involved.
 
 | Area | Details |
 | --- | --- |
+| Looks | 18 one-click looks with live thumbnails of your own picture, and **Surprise me** for random ones |
 | Sources | Images (PNG, JPG, WebP, AVIF…), animated GIF/WebP, video files, webcam, typed text, generated fire and plasma |
-| Glyphs | 38 character sets in 9 categories, your own characters (e.g. a name), depth 2–64, cell size, text or square grid, character offset, 8 glyph fonts including blackletter |
+| Drawing modes | ASCII by brightness, **Edges** (outlines drawn with `\| / - \` or box lines), **Halftone** (one glyph that grows with brightness) |
+| Dithering | Floyd–Steinberg, Atkinson or Bayer, for smooth tones with very few glyphs |
+| Glyphs | 38 character sets in 9 categories, picked visually; your own characters (e.g. a name), depth 2–64, cell size, text or square grid, 8 glyph fonts including blackletter |
 | Tone | Invert, brightness, contrast, gamma, cut-off, saturation |
-| Colour | 24 palettes, single colour, or colours sampled from the source; fade with tone; any background or transparent |
-| Effects | Two-stage glow, chromatic aberration, scanlines, vignette |
-| Title | Blackletter or mono title, either crisp on top or built from glyphs |
+| Colour | 24 palettes, a palette editor with up to 8 colours, one colour, or colours from the source; fade with tone; any background or transparent |
+| Effects | Two-stage glow, colour fringe, scanlines, vignette, film grain, CRT screen curve |
+| Title | Blackletter or mono title, crisp on top or built from glyphs |
 | Motion | Cycle, flicker or wave the glyphs; videos and GIFs play live |
-| Export | PNG at 1×–4×, SVG, HTML, TXT, copy to clipboard, video recording (MP4 where the browser supports it, otherwise WebM) |
-| Presets | Save, load, export and import settings as JSON |
+| Framing | 1:1, 4:5, 9:16, 16:9, 3:2 and 21:9 frames, zoom, move (also <kbd>Alt</kbd> + drag), rotate, mirror |
+| Editing | Before / after split view, undo and redo, editable values, double-click to reset |
+| Export | PNG at 1×–4× with optional trimming, animated GIF, video (MP4 where supported, otherwise WebM), SVG, HTML, TXT, clipboard |
+| Sharing | A link that carries all your settings; presets saved in the browser or as JSON |
 
 Glyphs are sorted by how much ink they leave in the chosen font, so any character set, including your own text, maps from dark to bright correctly.
 
@@ -65,7 +73,9 @@ It is the same app as the website and works completely offline. The executables 
 
 - **Engravings and line art:** turn on **Invert** and raise **Cut-off** until the paper disappears.
 - **Photos:** try **Source colours** with gamma 1.5–2 for dark pictures.
-- **Your name as the texture:** type it into **Inject characters**.
+- **Your name as the texture:** type it into **Your own characters** (Glyphs tab).
+- **Not sure where to start:** press <kbd>R</kbd> a few times, then <kbd>Ctrl</kbd>+<kbd>Z</kbd> back to the one you liked.
+- **Social posts:** pick a frame in the Frame tab, then hold <kbd>Alt</kbd> and drag the picture into place.
 - **Sharper detail:** lower the cell size or raise the output width.
 - **Blocks and braille** fill the cell best on the **Text** grid; **card suits and dots** look best on the **Square** grid.
 - Double-click any slider to reset it.
@@ -76,8 +86,13 @@ It is the same app as the website and works completely offline. The executables 
 | --- | --- |
 | <kbd>Ctrl</kbd> <kbd>O</kbd> | Open a file |
 | <kbd>Ctrl</kbd> <kbd>S</kbd> | Save PNG |
+| <kbd>E</kbd> | Export |
+| <kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> | Undo / redo |
+| <kbd>C</kbd> | Before / after |
+| <kbd>R</kbd> | Surprise me (random look) |
+| <kbd>Alt</kbd> + drag, <kbd>Alt</kbd> + wheel | Move and zoom the picture inside the frame |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd> | Copy as text |
-| <kbd>Ctrl</kbd> + mouse wheel | Zoom |
+| <kbd>Ctrl</kbd> + mouse wheel | Zoom the view |
 | <kbd>F</kbd> | Fit to screen |
 | <kbd>Space</kbd> | Play / pause |
 | <kbd>D</kbd> | Demos |
@@ -98,7 +113,7 @@ npm run serve      # http://127.0.0.1:5173
 npm test           # end-to-end checks in Edge or Chrome
 npm start          # desktop app
 npm run dist       # Windows portable + installer into release/
-npm run demos      # re-render demo previews, icons and the social image
+npm run demos      # re-render demo previews, icons, social image and screenshot
 ```
 
 ```
@@ -121,7 +136,9 @@ Demo artwork, all public domain or CC0:
 - Albrecht Dürer, *Self-Portrait at Twenty-Eight*, 1500 ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Albrecht_D%C3%BCrer_-_1500_self-portrait_(High_resolution_and_detail).jpg))
 - *Close Helmet*, c. 1555, The Metropolitan Museum of Art ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Close_Helmet_MET_DT271729.jpg))
 
-Fonts, all under the SIL Open Font License 1.1 (licence texts in [`web/fonts`](web/fonts)): IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic and a subset of Noto Sans Symbols 2.
+GIF encoding: [gifenc](https://github.com/mattdesl/gifenc) by Matt DesLauriers (MIT).
+
+Fonts, all under the SIL Open Font License 1.1 (licence texts in [`web/fonts`](web/fonts)): IBM Plex Sans, IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic and a subset of Noto Sans Symbols 2.
 
 ## License
 

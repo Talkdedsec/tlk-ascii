@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>TLK ASCII</title>
-  <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Palettes, runes, braille, card suits, blackletter titles, PNG/SVG/HTML/video export. Free, private, in your browser or as a Windows app.">
-  <meta name="theme-color" content="#0d0a08">
+  <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Looks, edge and halftone modes, dithering, palettes, CRT effects; PNG, GIF, video, SVG and HTML export. Free and private, in your browser or as a Windows app.">
+  <meta name="theme-color" content="#18181a">
   <meta property="og:title" content="TLK ASCII">
   <meta property="og:description" content="Image, video and text to glowing ASCII art. Free and private.">
   <meta property="og:type" content="website">
@@ -17,60 +17,48 @@
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img src="icons/icon-64.png" alt="" width="28" height="28">
-      <span class="brand-name">TLK ASCII</span>
-      <span class="brand-tag" data-i18n="tagline"></span>
-    </div>
-    <nav class="actions" aria-label="Main">
-      <button type="button" class="btn" id="btn-open" data-i18n-title="openHint">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2h9A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></svg>
-        <span data-i18n="open"></span>
-      </button>
-      <button type="button" class="btn" id="btn-webcam" data-i18n-title="webcam">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm12 4 5-3v8l-5-3z"/></svg>
-        <span data-i18n="webcam"></span>
-      </button>
-      <button type="button" class="btn" id="btn-text" data-i18n-title="text">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v3h-2V7h-4v10h2v2H9v-2h2V7H7v1H5z"/></svg>
-        <span data-i18n="text"></span>
-      </button>
-      <button type="button" class="btn" id="btn-demos" data-i18n-title="demos">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>
-        <span data-i18n="demos"></span>
-      </button>
+  <header class="bar">
+    <a class="brand" href="#" aria-label="TLK ASCII">
+      <img src="icons/icon-64.png" alt="" width="22" height="22">
+      <span>TLK ASCII</span>
+    </a>
+    <nav class="bar-group" aria-label="Source">
+      <button type="button" class="btn" id="btn-open" data-i18n-title="openHint"><span data-i18n="open"></span></button>
+      <button type="button" class="btn" id="btn-webcam"><span data-i18n="webcam"></span></button>
+      <button type="button" class="btn" id="btn-text"><span data-i18n="text"></span></button>
+      <button type="button" class="btn" id="btn-demos"><span data-i18n="demos"></span></button>
     </nav>
-    <div class="actions right">
-      <button type="button" class="btn primary" id="btn-png">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v9l3-3 1.4 1.4L12 16.8l-5.4-5.4L8 10l3 3zM5 18h14v2H5z"/></svg>
-        <span data-i18n="png"></span>
-      </button>
-      <a class="btn web-only" id="download-link" href="#" target="_blank" rel="noopener" data-i18n-title="downloadApp">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5l8-1.2v7.7H3zm9-1.3L21 2.5v9H12zM3 12.5h8v7.7L3 19zm9 0h9v9l-9-1.3z"/></svg>
-        <span>Windows</span>
-      </a>
-      <label class="lang">
-        <span class="sr" data-i18n="language"></span>
-        <select id="lang">
-          <option value="en">EN</option>
-          <option value="tr">TR</option>
-        </select>
-      </label>
-      <button type="button" class="btn icon" id="btn-about" data-i18n-title="about">?</button>
+    <div class="bar-group" aria-label="History">
+      <button type="button" class="btn icon" id="btn-undo" data-i18n-title="undo" disabled>↶</button>
+      <button type="button" class="btn icon" id="btn-redo" data-i18n-title="redo" disabled>↷</button>
     </div>
+    <span class="spacer"></span>
+    <a class="btn quiet web-only" id="download-link" href="#" target="_blank" rel="noopener" data-i18n-title="downloadApp">Windows</a>
+    <label class="lang">
+      <span class="sr" data-i18n="language"></span>
+      <select id="lang">
+        <option value="en">EN</option>
+        <option value="tr">TR</option>
+      </select>
+    </label>
+    <button type="button" class="btn icon" id="btn-about" data-i18n-title="about">?</button>
+    <button type="button" class="btn accent" id="btn-export" data-i18n-title="exportHint"><span data-i18n="export"></span></button>
   </header>
 
   <main class="workspace">
     <section class="stage busy" id="stage" aria-label="Preview">
       <div class="viewport" id="viewport">
-        <canvas id="out" width="1" height="1"></canvas>
+        <div class="frame" id="frame">
+          <canvas id="out" width="1" height="1"></canvas>
+          <canvas id="before" width="1" height="1" aria-hidden="true"></canvas>
+          <div class="divider" aria-hidden="true"><span></span></div>
+        </div>
       </div>
       <div class="empty-state">
         <h1 data-i18n="emptyTitle"></h1>
         <p data-i18n="emptyBody"></p>
-        <div class="row-btns">
-          <button type="button" class="btn primary" id="btn-open-empty"><span data-i18n="open"></span></button>
+        <div class="btn-row center">
+          <button type="button" class="btn accent" id="btn-open-empty"><span data-i18n="open"></span></button>
           <button type="button" class="btn" id="btn-demos-empty"><span data-i18n="pickDemo"></span></button>
         </div>
       </div>
@@ -78,25 +66,43 @@
         <strong data-i18n="dropTitle"></strong>
         <span data-i18n="dropBody"></span>
       </div>
-      <div class="spinner" aria-hidden="true"></div>
-      <div class="rec-badge" id="rec-badge" aria-live="polite"></div>
-      <footer class="statusbar">
+      <div class="busy-line" aria-hidden="true"></div>
+      <div class="rec-badge" role="status">
+        <span class="dot"></span><span data-i18n="recording"></span> <span id="rec-time"></span>
+        <button type="button" class="btn small" id="rec-stop"><span data-i18n="stopRec"></span></button>
+      </div>
+      <footer class="status">
         <button type="button" class="btn icon small" id="btn-play" hidden>❚❚</button>
-        <span id="status-size"></span>
-        <span class="muted" id="status-ms"></span>
+        <span id="status-src" class="src"></span>
+        <span id="status-size" class="num"></span>
+        <span id="status-ms" class="num muted"></span>
         <span class="spacer"></span>
-        <button type="button" class="btn icon small" id="zoom-out" data-i18n-title="zoomOut">−</button>
-        <button type="button" class="btn small mono" id="zoom-label" data-i18n-title="actual">100%</button>
-        <button type="button" class="btn icon small" id="zoom-in" data-i18n-title="zoomIn">+</button>
-        <button type="button" class="btn small" id="zoom-fit" data-i18n-title="fit">⤢</button>
+        <button type="button" class="btn small toggle" id="btn-compare" aria-pressed="false" data-i18n-title="compareHint"><span data-i18n="compare"></span></button>
+        <span class="zoom">
+          <button type="button" class="btn icon small" id="zoom-out" data-i18n-title="zoomOut">−</button>
+          <button type="button" class="btn small num" id="zoom-label" data-i18n-title="actual">100%</button>
+          <button type="button" class="btn icon small" id="zoom-in" data-i18n-title="zoomIn">+</button>
+          <button type="button" class="btn small" id="zoom-fit" data-i18n-title="fit">⤢</button>
+        </span>
       </footer>
     </section>
 
-    <aside class="panel" id="panel" aria-label="Settings"></aside>
+    <aside class="panel" aria-label="Settings">
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="panel-body" id="panel"></div>
+    </aside>
   </main>
 
   <input type="file" id="file" accept="image/*,video/*" hidden>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="dlg-export" class="dialog wide">
+    <header>
+      <h2 data-i18n="exportTitle"></h2>
+      <button type="button" class="btn icon" data-close data-i18n-title="close">×</button>
+    </header>
+    <div id="export-body"></div>
+  </dialog>
 
   <dialog id="dlg-demos" class="dialog wide">
     <header>
@@ -117,6 +123,11 @@
     <dl class="keys">
       <dt><kbd>Ctrl</kbd> <kbd>O</kbd></dt><dd data-i18n="kOpen"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>S</kbd></dt><dd data-i18n="kSave"></dd>
+      <dt><kbd>E</kbd></dt><dd data-i18n="kExport"></dd>
+      <dt><kbd>Ctrl</kbd> <kbd>Z</kbd> · <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd></dt><dd data-i18n="kUndo"></dd>
+      <dt><kbd>C</kbd></dt><dd data-i18n="kCompare"></dd>
+      <dt><kbd>R</kbd></dt><dd data-i18n="kRandom"></dd>
+      <dt data-i18n="kPanKeys"></dt><dd data-i18n="kPan"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd></dt><dd data-i18n="kCopy"></dd>
       <dt><kbd>F</kbd></dt><dd data-i18n="kFit"></dd>
       <dt><kbd>Space</kbd></dt><dd data-i18n="kPlay"></dd>
@@ -130,9 +141,15 @@
   <script src="js/charsets.js"></script>
   <script src="js/palettes.js"></script>
   <script src="js/presets.js"></script>
+  <script src="js/looks.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/sources.js"></script>
   <script src="js/exporter.js"></script>
+  <script src="js/vendor/gifenc.js"></script>
+  <script src="js/gif.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/panel.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

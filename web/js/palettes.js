@@ -44,7 +44,12 @@
       ]
     },
     {
-      id: 'mono', name: n('Monochrome', 'Tek renk'), palettes: [
+      id: 'custom', name: n('Custom', 'Özel'), palettes: [
+        { id: 'custom', name: n('My palette', 'Paletim'), stops: null }
+      ]
+    },
+    {
+      id: 'mono', name: n('Monochrome', 'Monokrom'), palettes: [
         { id: 'gray', name: n('Grayscale', 'Gri tonlar'), stops: ['#2a2a2a', '#ffffff'] },
         { id: 'sepia', name: n('Sepia', 'Sepya'), stops: ['#2b1d12', '#8a6a4a', '#e8d3b0'] },
         { id: 'ink', name: n('Ink on paper', 'Kâğıtta mürekkep'), stops: ['#c9c2b4', '#1b1611'] }
@@ -59,8 +64,15 @@
   }
   GF.hexToRgb = hexToRgb;
 
-  GF.paletteStops = function (key) {
+  /* "#000000,#ff3b1f,#ffffff" → valid stops, at least two. */
+  GF.parseStops = function (text) {
+    const stops = String(text || '').split(',').map((x) => x.trim().toLowerCase()).filter((x) => /^#[0-9a-f]{6}$/.test(x));
+    return stops.length >= 2 ? stops.slice(0, 8) : ['#000000', '#ffffff'];
+  };
+
+  GF.paletteStops = function (key, settings) {
     const [catId, palId] = String(key || '').split('/');
+    if (catId === 'custom') return GF.parseStops(settings && settings.customStops);
     const cat = GF.PALETTE_CATEGORIES.find((c) => c.id === catId) || GF.PALETTE_CATEGORIES[0];
     const pal = cat.palettes.find((p) => p.id === palId) || cat.palettes[0];
     return pal.stops;

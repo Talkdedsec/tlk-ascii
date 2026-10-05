@@ -34,7 +34,7 @@
       let line = '';
       for (let x = 0; x < last.cols; x++) {
         const gi = last.idx[y * last.cols + x];
-        line += gi < 0 ? ' ' : last.ramp[gi].chr;
+        line += gi < 0 ? ' ' : last.glyphs[gi].chr;
       }
       lines.push(line.replace(/\s+$/, ''));
     }
@@ -50,7 +50,7 @@
       const i = y * last.cols + x;
       const gi = last.idx[i];
       const p = i * 4;
-      const chr = gi < 0 ? ' ' : last.ramp[gi].chr;
+      const chr = gi < 0 ? ' ' : last.glyphs[gi].chr;
       let color = null;
       if (gi >= 0) {
         const q = (v) => Math.min(255, Math.round(v / 8) * 8);
@@ -146,7 +146,14 @@
     record(canvas, seconds, onTick) {
       const type = this.recorderType();
       if (!type || !canvas.captureStream) return null;
-      const stream = canvas.captureStream(30);
+      /* Frames are pushed by the render loop through frame(), so every
+         rendered picture is recorded even when the browser throttles timers. */
+      let stream = canvas.captureStream(0);
+      let track = stream.getVideoTracks()[0];
+      if (!track || typeof track.requestFrame !== 'function') {
+        stream = canvas.captureStream(30);
+        track = null;
+      }
       const rec = new window.MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 16000000 });
       const chunks = [];
       rec.ondataavailable = (e) => e.data && e.data.size && chunks.push(e.data);
@@ -157,7 +164,8 @@
           clearInterval(timer);
           stream.getTracks().forEach((t) => t.stop());
           const ext = type.startsWith('video/mp4') ? 'mp4' : 'webm';
-          resolve({ blob: new Blob(chunks, { type: type.split(';')[0] }), ext });
+          const blob = new Blob(chunks, { type: type.split(';')[0] });
+          resolve({ blob: blob.size > 1024 ? blob : null, ext });
         };
       });
       rec.start(250);
@@ -166,7 +174,12 @@
         if (onTick) onTick(el);
         if (seconds && el >= seconds && rec.state === 'recording') rec.stop();
       }, 100);
-      return { done, stop: () => rec.state === 'recording' && rec.stop() };
+      if (track) track.requestFrame();
+      return {
+        done,
+        stop: () => rec.state === 'recording' && rec.stop(),
+        frame: () => track && rec.state === 'recording' && track.requestFrame()
+      };
     }
   };
 })(window.GF = window.GF || {});

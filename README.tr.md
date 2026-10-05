@@ -15,7 +15,7 @@
 
 </div>
 
-TLK ASCII; resimleri, videoları, GIF'leri, kamera görüntüsünü ve düz yazıyı parlayan ASCII sanatına çevirir. 38 karakter seti (klasik rampalar, braille, bloklar, kart takımları, runlar, katakana…), 24 renk paleti ya da kaynağın kendi renkleri arasından seç; üstüne parlama, renk kayması, tarama çizgileri, gotik başlık ve hareket ekle. PNG (4 kata kadar), SVG, HTML, düz metin veya video olarak dışa aktar.
+TLK ASCII; resimleri, videoları, GIF'leri, kamera görüntüsünü ve düz yazıyı parlayan ASCII sanatına çevirir. 18 hazır görünümden biriyle başla ya da kendininkini kur: üç çizim modu (ASCII, kenar çizgileri, yarım ton), dithering, 38 karakter seti (klasik rampalar, braille, bloklar, kart takımları, runlar, katakana…), 24 palet ve kendi paletin, parlama, CRT ekran bükülmesi, tarama çizgileri, film greni, gotik başlık ve hareket. Her formata göre kadrajla, orijinalle karşılaştır, her adımı geri al; sonra PNG, GIF, video, SVG, HTML veya metin olarak dışa aktar.
 
 Her şey senin cihazında çalışır: GitHub Pages üzerinden tarayıcıda ya da internetsiz çalışan bir Windows programı olarak. Arayüz **Türkçe ve İngilizce**.
 
@@ -26,13 +26,16 @@ Her demo bir kaynak ve eksiksiz bir ayar seti yükler. Uygulamada açmak için b
 | | | | | |
 |:-:|:-:|:-:|:-:|:-:|
 | [![Memento mori](web/demos/previews/skull.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=skull)<br>Memento mori | [![Şövalye, Ölüm ve Şeytan](web/demos/previews/knight.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=knight)<br>Şövalye, Ölüm ve Şeytan | [![Ejderhanın runları](web/demos/previews/dragon.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=dragon)<br>Ejderhanın runları | [![Yaldızlı gergedan](web/demos/previews/rhino.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=rhino)<br>Yaldızlı gergedan | [![Dövme miğfer](web/demos/previews/helmet.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=helmet)<br>Dövme miğfer |
-| [![Renkli otoportre](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Renkli otoportre | [![Fosfor Melankoli](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Fosfor Melankoli | [![Canlı ateş](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Canlı ateş (hareketli) | [![Gotik başlık](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gotik başlık | [![Buhar plazma](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Buhar plazma (hareketli) |
+| [![Renkli otoportre](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Renkli otoportre | [![Fosfor Melankoli](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Fosfor Melankoli | [![Çizgi eskiz (kenar)](web/demos/previews/sketch.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=sketch)<br>Çizgi eskiz (kenar) | [![Renkli yarım ton](web/demos/previews/halftone.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=halftone)<br>Renkli yarım ton | [![Tek bit Atkinson](web/demos/previews/bitmap.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=bitmap)<br>Tek bit Atkinson |
+| [![Canlı ateş (hareketli)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Canlı ateş (hareketli) | [![Gotik başlık](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gotik başlık | [![Buhar plazma (hareketli)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Buhar plazma (hareketli) |   |   |
+
+![TLK ASCII çalışma alanı](docs/screenshot.jpg)
 
 ## 10 saniyede başla
 
 1. [TLK ASCII'yi aç](https://talkdedsec.github.io/tlk-ascii/).
 2. Sayfaya bir resim ya da video sürükle, <kbd>Ctrl</kbd>+<kbd>V</kbd> ile yapıştır veya **Demolar**'dan birini seç.
-3. Sağdaki paneli ayarla, sonra **PNG kaydet**'e bas.
+3. Sağdan bir görünüme tıkla, diğer sekmelerde ince ayar yap, sonra **Dışa aktar**'a bas.
 
 Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 
@@ -40,15 +43,20 @@ Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 
 | Bölüm | Ayrıntı |
 | --- | --- |
+| Görünümler | Kendi resminle canlı küçük önizlemeli 18 tek tık görünüm ve rastgele görünümler için **Şaşırt beni** |
 | Kaynaklar | Resimler (PNG, JPG, WebP, AVIF…), hareketli GIF/WebP, video dosyaları, kamera, yazı, üretilmiş ateş ve plazma |
-| Karakterler | 9 kategoride 38 karakter seti, kendi karakterlerin (örneğin bir isim), 2–64 derinlik, hücre boyutu, metin veya kare ızgara, karakter kaydırma, gotikler dahil 8 karakter fontu |
+| Çizim modları | Parlaklığa göre ASCII, **Kenar** (dış hatlar `\| / - \` ya da kutu çizgileriyle), **Yarım ton** (parlaklıkla büyüyen tek karakter) |
+| Dithering | Çok az karakterle yumuşak tonlar için Floyd–Steinberg, Atkinson veya Bayer |
+| Karakterler | 9 kategoride, görsel olarak seçilen 38 karakter seti; kendi karakterlerin (örneğin bir isim), 2–64 derinlik, hücre boyutu, metin veya kare ızgara, gotikler dahil 8 karakter fontu |
 | Ton | Ters çevirme, parlaklık, kontrast, gama, kesme eşiği, doygunluk |
-| Renk | 24 palet, tek renk ya da kaynaktan alınan renkler; tona göre solma; istediğin arka plan veya saydam |
-| Efektler | İki aşamalı parlama, renk kayması, tarama çizgileri, vinyet |
+| Renk | 24 palet, 8 renge kadar palet editörü, tek renk ya da kaynaktan alınan renkler; tona göre solma; istediğin arka plan veya saydam |
+| Efektler | İki aşamalı parlama, renk saçağı, tarama çizgileri, vinyet, film greni, CRT ekran bükülmesi |
 | Başlık | Gotik ya da düz başlık; üstte net veya karakterlerden örülmüş |
 | Hareket | Karakter döngüsü, titreme veya dalga; videolar ve GIF'ler canlı oynar |
-| Dışa aktarma | 1×–4× PNG, SVG, HTML, TXT, panoya kopyalama, video kaydı (tarayıcı destekliyorsa MP4, değilse WebM) |
-| Ön ayarlar | Ayarları kaydet, yükle, JSON olarak dışa ve içe aktar |
+| Kadraj | 1:1, 4:5, 9:16, 16:9, 3:2 ve 21:9 oranlar, yakınlaştırma, kaydırma (<kbd>Alt</kbd> + sürükle ile de), döndürme, aynalama |
+| Düzenleme | Önce / sonra bölünmüş görünüm, geri al ve ileri al, elle yazılabilen değerler, çift tıkla sıfırlama |
+| Dışa aktarma | İsteğe bağlı kırpmayla 1×–4× PNG, hareketli GIF, video (destekleniyorsa MP4, değilse WebM), SVG, HTML, TXT, pano |
+| Paylaşım | Tüm ayarlarını taşıyan bir link; tarayıcıda ya da JSON olarak saklanan ön ayarlar |
 
 Karakterler, seçilen fontta bıraktıkları mürekkep miktarına göre sıralanır. Bu sayede her set, senin yazdığın karakterler dahil, karanlıktan aydınlığa doğru eşlenir.
 
@@ -65,7 +73,9 @@ Web sitesiyle aynı uygulamadır ve tamamen internetsiz çalışır. Dosyalar ko
 
 - **Gravür ve çizgi resimler:** **Ters çevir**'i aç, kâğıt kaybolana kadar **Kesme eşiği**'ni yükselt.
 - **Fotoğraflar:** karanlık resimlerde **Kaynak renkleri** ile 1,5–2 gama dene.
-- **İsminden doku:** ismini **Kendi karakterlerin** alanına yaz.
+- **İsminden doku:** ismini **Kendi karakterlerin** alanına yaz (Karakter sekmesi).
+- **Nereden başlayacağını bilmiyorsan:** birkaç kez <kbd>R</kbd>'ye bas, beğendiğine <kbd>Ctrl</kbd>+<kbd>Z</kbd> ile geri dön.
+- **Sosyal medya paylaşımları:** Kadraj sekmesinden bir oran seç, sonra <kbd>Alt</kbd>'a basılı tutup resmi yerine sürükle.
 - **Daha keskin ayrıntı:** hücre boyutunu düşür ya da çıktı genişliğini artır.
 - **Bloklar ve braille** **Metin** ızgarasında hücreyi en iyi doldurur; **kart takımları ve noktalar** **Kare** ızgarada en iyi görünür.
 - Herhangi bir kaydırıcıyı sıfırlamak için üstüne çift tıkla.
@@ -76,8 +86,13 @@ Web sitesiyle aynı uygulamadır ve tamamen internetsiz çalışır. Dosyalar ko
 | --- | --- |
 | <kbd>Ctrl</kbd> <kbd>O</kbd> | Dosya aç |
 | <kbd>Ctrl</kbd> <kbd>S</kbd> | PNG kaydet |
+| <kbd>E</kbd> | Dışa aktar |
+| <kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> | Geri al / ileri al |
+| <kbd>C</kbd> | Önce / sonra |
+| <kbd>R</kbd> | Şaşırt beni (rastgele görünüm) |
+| <kbd>Alt</kbd> + sürükle, <kbd>Alt</kbd> + tekerlek | Resmi kadraj içinde kaydır ve yakınlaştır |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd> | Metin olarak kopyala |
-| <kbd>Ctrl</kbd> + fare tekerleği | Yakınlaştır |
+| <kbd>Ctrl</kbd> + fare tekerleği | Görünümü yakınlaştır |
 | <kbd>F</kbd> | Ekrana sığdır |
 | <kbd>Boşluk</kbd> | Oynat / duraklat |
 | <kbd>D</kbd> | Demolar |
@@ -98,7 +113,7 @@ npm run serve      # http://127.0.0.1:5173
 npm test           # Edge veya Chrome'da uçtan uca testler
 npm start          # masaüstü uygulaması
 npm run dist       # release/ klasörüne Windows portable + kurulum
-npm run demos      # demo önizlemelerini, ikonları ve paylaşım görselini yeniden üret
+npm run demos      # demo önizlemelerini, ikonları, paylaşım görselini ve ekran görüntüsünü yeniden üret
 ```
 
 ```
@@ -121,7 +136,9 @@ Demo görselleri, hepsi kamu malı veya CC0:
 - Albrecht Dürer, *Yirmi Sekiz Yaşında Otoportre*, 1500 ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Albrecht_D%C3%BCrer_-_1500_self-portrait_(High_resolution_and_detail).jpg))
 - *Kapalı Miğfer*, y. 1555, The Metropolitan Museum of Art ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Close_Helmet_MET_DT271729.jpg))
 
-Fontlar, hepsi SIL Open Font License 1.1 altında (lisans metinleri [`web/fonts`](web/fonts) içinde): IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic ve Noto Sans Symbols 2'nin bir alt kümesi.
+GIF kodlama: Matt DesLauriers'ın [gifenc](https://github.com/mattdesl/gifenc) kütüphanesi (MIT).
+
+Fontlar, hepsi SIL Open Font License 1.1 altında (lisans metinleri [`web/fonts`](web/fonts) içinde): IBM Plex Sans, IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic ve Noto Sans Symbols 2'nin bir alt kümesi.
 
 ## Lisans
 

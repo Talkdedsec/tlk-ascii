@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0
+
+- New darkroom interface: neutral graphite, tabbed panel, accent colour taken from the current palette.
+- Looks gallery with live thumbnails of your own picture, plus random looks.
+- Edge and halftone drawing modes; Floyd–Steinberg, Atkinson and Bayer dithering.
+- Visual character set and palette pickers; palette editor with up to 8 colours.
+- Film grain and CRT screen curve.
+- Framing: aspect presets, zoom, move (Alt + drag), rotate, mirror.
+- Before / after split view, undo and redo, editable slider values.
+- Export dialog with animated GIF, trimmed PNG and settings links.
+- Three new demos: line sketch, colour halftone, one-bit Atkinson.
+- Video recording pushes every rendered frame, so clips are never empty.
+
 ## 1.0.0
 
 - Image, animated GIF/WebP, video, webcam, text, fire and plasma sources.

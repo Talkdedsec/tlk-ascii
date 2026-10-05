@@ -134,6 +134,18 @@ try {
   });
   await save('web/icons/og.jpg', og);
 
+  // Interface screenshot for the README.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.evaluate(() => {
+    localStorage.setItem('tlk-ascii.lang', 'en');
+    localStorage.setItem('tlk-ascii.tab', 'looks');
+  });
+  await page.goto(url + 'index.html#demo=skull');
+  await page.evaluate(() => window.TLKASCII.ready);
+  await page.waitForTimeout(2500);
+  const shot = await page.screenshot({ type: 'jpeg', quality: 86 });
+  await save('docs/screenshot.jpg', 'data:image/jpeg;base64,' + shot.toString('base64'));
+
   const bad = errors.filter((e) => !/404/.test(e));
   if (bad.length) {
     console.error(bad.join('\n'));
