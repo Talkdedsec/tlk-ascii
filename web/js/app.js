@@ -95,9 +95,35 @@
     syncHistoryButtons
   );
 
+  /* ---------- session: the last settings survive a reload ---------- */
+
+  let saveTimer = 0;
+  function saveSession() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem('tlk-ascii.session', JSON.stringify({
+          demo: currentDemo ? currentDemo.id : null,
+          text: kind() === 'text',
+          settings: S
+        }));
+      } catch (e) { /* storage may be unavailable */ }
+    }, 600);
+  }
+
+  function readSession() {
+    try {
+      const v = JSON.parse(localStorage.getItem('tlk-ascii.session') || 'null');
+      return v && typeof v === 'object' && v.settings ? v : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function set(k, v) {
     if (S[k] === v) return;
     S[k] = v;
+    saveSession();
     if (TEXT_KEYS.includes(k) && source && source.kind === 'text') source.dirty = true;
     if (k === 'textFont' || k === 'titleFont' || k === 'glyphFont') ensureFont(v);
     if (!GF.EXPORT_KEYS.includes(k)) undo.touch();
@@ -110,6 +136,7 @@
 
   function setMany(partial, base) {
     Object.assign(S, base || {}, clean(partial));
+    saveSession();
     undo.touch();
     afterBulk();
   }
@@ -207,11 +234,18 @@
       if (source) source.dispose();
       if (!demo) leaveDemo();
       source = src;
+      if (source) {
+        source.onChange = () => {
+          invalidate();
+          GF.Rail.refresh();
+        };
+      }
       currentDemo = demo || null;
       playing = true;
       clockStart = performance.now();
       zoom = 'fit';
       stage.classList.remove('empty');
+      saveSession();
       GF.Panel.sourceChanged();
       if (GF.Rail) GF.Rail.sourceChanged();
       syncPlay();
@@ -250,6 +284,44 @@
     src.dirty = true;
     src.update(0, S);
     await setSource(Promise.resolve(src));
+    GF.Panel.setTab('frame');
+  }
+
+  /* the font gallery: your text in every FIGlet font, rendered as fonts arrive */
+  function openFonts() {
+    const dlg = $('#dlg-fonts');
+    const grid = $('#font-grid');
+    const search = $('#font-search');
+    const sample = (String(S.text || 'TLK').split('\n')[0] || 'TLK').slice(0, 10);
+    const cards = GF.FIGLET_FONTS.map(([id, name]) => {
+      const pre = el('pre', { class: 'font-art', text: '…' });
+      const card = el('button', {
+        type: 'button', class: 'font-card' + (S.figletFont === id ? ' on' : ''), 'aria-pressed': S.figletFont === id ? 'true' : 'false',
+        onclick: () => {
+          dlg.close();
+          set('figletFont', id);
+        }
+      }, [pre, el('span', { text: name })]);
+      card.dataset.name = name.toLowerCase();
+      GF.Banner.load(id).then(() => {
+        pre.textContent = window.figlet.textSync(sample, { font: id });
+      }, () => (pre.textContent = '×'));
+      return card;
+    });
+    grid.replaceChildren(...cards);
+    search.value = '';
+    search.placeholder = t('searchFonts');
+    search.oninput = () => {
+      const q = search.value.trim().toLowerCase();
+      cards.forEach((c) => (c.hidden = !!q && !c.dataset.name.includes(q)));
+    };
+    if (!dlg.open) dlg.showModal();
+    search.focus();
+  }
+
+  async function openBanner() {
+    if (kind() !== 'text') await openText();
+    set('textMode', 'figlet');
     GF.Panel.setTab('frame');
   }
 
@@ -919,9 +991,36 @@
   /* ---------- start ---------- */
 
   if (isDesktop) document.body.classList.add('desktop');
+  /* installable and offline on the web (not inside the desktop app) */
+  if (!isDesktop && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
   $('#repo-link').href = REPO;
   $('#download-link').href = REPO + '/releases/latest';
   applyStaticText();
+
+  /* ---------- desktop: tell about a newer release, at most once a day ---------- */
+
+  function newer(a, b) {
+    const pa = String(a).replace(/^v/, '').split('.').map(Number);
+    const pb = String(b).replace(/^v/, '').split('.').map(Number);
+    for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
+    return false;
+  }
+
+  async function checkForUpdate() {
+    try {
+      const last = Number(localStorage.getItem('tlk-ascii.updateCheck') || 0);
+      if (Date.now() - last < 864e5) return;
+      localStorage.setItem('tlk-ascii.updateCheck', String(Date.now()));
+      const r = await fetch('https://api.github.com/repos/Talkdedsec/tlk-ascii/releases/latest', { headers: { Accept: 'application/vnd.github+json' } });
+      if (!r.ok) return;
+      const { tag_name: tag, html_url: url } = await r.json();
+      if (tag && newer(tag, GF.VERSION)) {
+        toast(t('updateReady', { v: tag.replace(/^v/, '') }), false, { label: t('updateGet'), run: () => window.open(url, '_blank') });
+      }
+    } catch (e) { /* offline is fine */ }
+  }
 
   /* ---------- layout: looks rail, focus mode, tips ---------- */
 
@@ -974,6 +1073,8 @@
       { group: A, label: plain('openHint'), hint: 'Ctrl O', run: () => fileInput.click() },
       { group: A, label: t('webcam'), run: openWebcam },
       { group: A, label: t('text'), run: openText },
+      { group: A, label: t('banner'), keywords: 'figlet ascii banner taag ansi shadow', run: openBanner },
+      { group: A, label: t('browseFonts'), keywords: 'figlet font', run: async () => { await openBanner(); openFonts(); } },
       { group: A, label: t('demos'), hint: 'D', run: openDemos },
       { group: A, label: t('export'), hint: 'E', run: openExport },
       { group: A, label: t('png'), hint: 'Ctrl S', run: exportPNG },
@@ -1000,7 +1101,7 @@
   }
 
   GF.Panel.mount({
-    S, set, setMany, applyLook, toast, renderThumb,
+    S, set, setMany, applyLook, toast, renderThumb, openFonts,
     kind,
     hasSource: () => !!source,
     sourceName: () => (currentDemo ? nm(currentDemo.name) : source && source.kind !== 'text' ? source.name : ''),
@@ -1021,6 +1122,21 @@
      shared settings on top. */
   function openFromHash() {
     const m = /demo=([\w-]+)/.exec(location.hash);
+    const session = !m && !readShared() ? readSession() : null;
+    if (session) {
+      /* a demo or text comes back exactly; your own picture cannot, so its look returns on the default demo */
+      const restore = session.demo || session.text ? clean(session.settings) : (() => {
+        const look = {};
+        GF.LOOK_KEYS.forEach((k) => k in session.settings && (look[k] = session.settings[k]));
+        return clean(look);
+      })();
+      const start = session.demo || GF.DEMOS[0].id;
+      return loadDemo(session.text ? 'gothic' : start, true).then((ok) => {
+        setMany(restore, session.demo || session.text ? GF.DEFAULTS : null);
+        undo.reset();
+        return ok;
+      });
+    }
     const shared = readShared();
     if (shared) return loadDemo(m ? m[1] : GF.DEMOS[0].id, true).then((ok) => {
       setMany(shared, GF.DEFAULTS);
@@ -1038,6 +1154,7 @@
     if (!source) stage.classList.add('empty');
     stage.classList.remove('busy');
     showTips();
+    if (isDesktop) checkForUpdate();
     syncPlay();
     return ok;
   });

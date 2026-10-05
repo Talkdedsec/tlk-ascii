@@ -1,0 +1,15 @@
+{
+  "name": "TLK ASCII",
+  "short_name": "TLK ASCII",
+  "description": "Image, video and text to glowing ASCII art.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#18181a",
+  "theme_color": "#18181a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

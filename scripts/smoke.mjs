@@ -1,11 +1,15 @@
 // End-to-end checks in a real browser: demos, drawing modes, framing,
 // looks, history, compare, every export, share links, language, no errors.
-import { mkdir, rm, stat } from 'node:fs/promises';
+import { mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { open } from './browser.mjs';
 
 const shots = process.env.SHOT_DIR;
+const ROOT = new URL('..', import.meta.url);
+const pkg = JSON.parse(await readFile(new URL('package.json', ROOT), 'utf8'));
+const webVersion = /VERSION = '([^']+)'/.exec(await readFile(new URL('web/js/version.js', ROOT), 'utf8'))[1];
+const swVersion = /tlk-ascii-([\d.]+)'/.exec(await readFile(new URL('web/sw.js', ROOT), 'utf8'))[1];
 const failures = [];
 const check = (ok, msg) => {
   if (!ok) failures.push(msg);
@@ -21,6 +25,7 @@ try {
   await page.waitForFunction(() => window.TLKASCII && window.TLKASCII.ready);
   await page.evaluate(() => window.TLKASCII.ready);
   if (shots) await mkdir(shots, { recursive: true });
+  check(pkg.version === webVersion && pkg.version === swVersion, `version ${pkg.version} matches web (${webVersion}) and offline cache (${swVersion})`);
 
   /* demos */
   const ids = await page.evaluate(() => window.GF.DEMOS.map((d) => d.id));
@@ -214,6 +219,32 @@ try {
   });
   check(got === '155 neon/cyber edges 1:1', `share link restores settings (${got})`);
   await shared.close();
+
+  /* FIGlet banner: exact text out, rendered with effects */
+  await page.evaluate(() => window.TLKASCII.loadDemo('banner'));
+  await page.waitForFunction(() => window.TLKASCII.text().startsWith('████████╗'), null, { timeout: 10000 }).catch(() => {});
+  const banner = await page.evaluate(() => window.TLKASCII.text().split('\n')[0]);
+  check(banner.startsWith('████████╗██╗     ██╗  ██╗'), `FIGlet banner text is exact ("${banner.slice(0, 26)}")`);
+  await page.evaluate(() => window.TLKASCII.set({ figletFont: 'slant' }));
+  await page.waitForFunction(() => window.TLKASCII.text().includes('/'), null, { timeout: 10000 }).catch(() => {});
+  check(await page.evaluate(() => window.TLKASCII.text().includes('/_/')), 'switching the banner font loads it and redraws');
+
+  /* the last settings survive a reload */
+  await page.evaluate(() => window.TLKASCII.loadDemo('dragon'));
+  await page.evaluate(() => window.TLKASCII.set({ glow: 177 }));
+  await page.waitForTimeout(900);
+  await page.goto(url);
+  await page.evaluate(() => window.TLKASCII.ready);
+  const restored = await page.evaluate(() => [window.TLKASCII.settings.glow, document.getElementById('status-src').textContent].join(' | '));
+  check(/^177 \| .*(dragon|runes)/i.test(restored), `session restored after reload (${restored})`);
+
+  /* installable web app */
+  const pwa = await page.evaluate(async () => {
+    const m = await fetch('manifest.webmanifest').then((r) => r.json());
+    const reg = await navigator.serviceWorker.ready.then(() => true, () => false);
+    return m.name + ' ' + reg;
+  });
+  check(pwa === 'TLK ASCII true', `manifest and offline worker (${pwa})`);
 
   /* language */
   await page.selectOption('#lang', 'tr');

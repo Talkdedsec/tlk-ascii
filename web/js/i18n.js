@@ -75,7 +75,14 @@
       applied: '{name} applied', undoAction: 'Undo',
       tipsTitle: 'Getting around', tip1: 'Drop or paste any picture, GIF or video.', tip2: 'Click a look on the left, or press R for a random one.',
       tip3: 'Drag across a number to change it; double-click a label to reset.', tip4: 'Ctrl+K finds every action, look and demo.', gotIt: 'Got it',
-      timeline: 'Timeline', kCommand: 'Search everything', kFocus: 'Focus mode'
+      timeline: 'Timeline', kCommand: 'Search everything', kFocus: 'Focus mode',
+      textMode: 'Style', textModeImage: 'Typeface', textModeFiglet: 'FIGlet banner', figletFont: 'Banner font', browseFonts: 'Browse all fonts',
+      figletLayout: 'Letter spacing', layoutDefault: 'Normal', layoutFitted: 'Tight', layoutFull: 'Wide',
+      bannerGradient: 'Colour runs', gradV: 'Down', gradH: 'Across', gradD: 'Diagonal', gradFlat: 'Flat',
+      bannerHint: 'Copy text and TXT export give the banner exactly, ready for a README or terminal.',
+      glyphsBannerHint: 'A FIGlet banner draws its own characters, so character sets and drawing modes do not apply.',
+      fontsTitle: 'FIGlet fonts', fontsBody: 'Your text in every font. Click one to use it.', searchFonts: 'Search fonts', banner: 'FIGlet banner',
+      updateReady: 'Version {v} is available.', updateGet: 'Download'
     },
     tr: {
       tagline: 'Resim, video ve yazıdan parlayan ASCII sanatı',
@@ -149,7 +156,14 @@
       applied: '{name} uygulandı', undoAction: 'Geri al',
       tipsTitle: 'Kısa rehber', tip1: 'Herhangi bir resim, GIF veya videoyu bırak ya da yapıştır.', tip2: 'Soldan bir görünüme tıkla ya da rastgele biri için R’ye bas.',
       tip3: 'Bir sayının üstünde sürükleyerek değiştir; etikete çift tıklayınca sıfırlanır.', tip4: 'Ctrl+K her işlemi, görünümü ve demoyu bulur.', gotIt: 'Anladım',
-      timeline: 'Zaman çizelgesi', kCommand: 'Her şeyi ara', kFocus: 'Odak modu'
+      timeline: 'Zaman çizelgesi', kCommand: 'Her şeyi ara', kFocus: 'Odak modu',
+      textMode: 'Stil', textModeImage: 'Yazı tipi', textModeFiglet: 'FIGlet başlık', figletFont: 'Başlık fontu', browseFonts: 'Tüm fontlara göz at',
+      figletLayout: 'Harf aralığı', layoutDefault: 'Normal', layoutFitted: 'Sıkı', layoutFull: 'Geniş',
+      bannerGradient: 'Renk yönü', gradV: 'Aşağı', gradH: 'Yana', gradD: 'Çapraz', gradFlat: 'Düz',
+      bannerHint: 'Metni kopyala ve TXT dışa aktarma başlığı birebir verir; README veya terminal için hazır.',
+      glyphsBannerHint: 'FIGlet başlık kendi karakterlerini çizer; karakter seti ve çizim modu burada geçerli değil.',
+      fontsTitle: 'FIGlet fontları', fontsBody: 'Yazın her fontta. Kullanmak için birine tıkla.', searchFonts: 'Font ara', banner: 'FIGlet başlık',
+      updateReady: '{v} sürümü çıktı.', updateGet: 'İndir'
     }
   };
 

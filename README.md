@@ -17,7 +17,7 @@
 
 TLK ASCII turns pictures, videos, GIFs, your webcam and plain text into ASCII art that glows. Start from one of 26 looks or build your own: three drawing modes (ASCII, edge lines, halftone), dithering, 38 character sets (classic ramps, braille, blocks, card suits, runes, katakana…), 24 palettes plus your own, glow, CRT curve, scanlines, film grain, a blackletter title and motion. Frame it for any format, compare with the original, undo anything, then export PNG, GIF, video, SVG, HTML or text.
 
-It runs entirely on your device: in the browser through GitHub Pages, or as an offline Windows program. The interface is in **English and Turkish**.
+It runs entirely on your device: in the browser through GitHub Pages (installable, works offline), or as an offline Windows program. Your last settings come back when you return. The interface is in **English and Turkish**.
 
 ## Demos
 
@@ -27,7 +27,7 @@ Every demo loads a source and a complete set of settings. Click one to open it i
 |:-:|:-:|:-:|:-:|:-:|
 | [![Memento mori](web/demos/previews/skull.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=skull)<br>Memento mori | [![Knight, Death and Devil](web/demos/previews/knight.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=knight)<br>Knight, Death and Devil | [![Runes of the dragon](web/demos/previews/dragon.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=dragon)<br>Runes of the dragon | [![Gilded rhinoceros](web/demos/previews/rhino.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=rhino)<br>Gilded rhinoceros | [![Forged helmet](web/demos/previews/helmet.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=helmet)<br>Forged helmet |
 | [![Self-portrait in colour](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Self-portrait in colour | [![Phosphor Melencolia](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Phosphor Melencolia | [![Line sketch (edges)](web/demos/previews/sketch.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=sketch)<br>Line sketch (edges) | [![Colour halftone](web/demos/previews/halftone.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=halftone)<br>Colour halftone | [![One-bit Atkinson](web/demos/previews/bitmap.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=bitmap)<br>One-bit Atkinson |
-| [![Living fire (animated)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Living fire (animated) | [![Gothic title](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gothic title | [![Vapour plasma (animated)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Vapour plasma (animated) |   |   |
+| [![Living fire (animated)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Living fire (animated) | [![Gothic title](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gothic title | [![Vapour plasma (animated)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Vapour plasma (animated) | [![FIGlet banner](web/demos/previews/banner.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=banner)<br>FIGlet banner |   |
 
 ![The TLK ASCII workspace](docs/screenshot.jpg)
 
@@ -45,6 +45,7 @@ No login, installation or upload is involved.
 | --- | --- |
 | Looks | A gallery of 26 looks with live thumbnails of your own picture: search, categories, favourites, saved presets and **Surprise me** |
 | Sources | Images (PNG, JPG, WebP, AVIF…), animated GIF/WebP, video files, webcam, typed text, generated fire and plasma |
+| FIGlet banners | 56 classic lettering fonts (ANSI Shadow, Slant, Bloody, DOS Rebel…) with a gallery that previews your text; copy the exact banner for a README or terminal, or export it with gradients and glow |
 | Drawing modes | ASCII by brightness, **Edges** (outlines drawn with `\| / - \` or box lines), **Halftone** (one glyph that grows with brightness) |
 | Dithering | Floyd–Steinberg, Atkinson or Bayer, for smooth tones with very few glyphs |
 | Glyphs | 38 character sets in 9 categories, picked visually; your own characters (e.g. a name), depth 2–64, cell size, text or square grid, 8 glyph fonts including blackletter |
@@ -139,7 +140,7 @@ Demo artwork, all public domain or CC0:
 - Albrecht Dürer, *Self-Portrait at Twenty-Eight*, 1500 ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Albrecht_D%C3%BCrer_-_1500_self-portrait_(High_resolution_and_detail).jpg))
 - *Close Helmet*, c. 1555, The Metropolitan Museum of Art ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Close_Helmet_MET_DT271729.jpg))
 
-GIF encoding: [gifenc](https://github.com/mattdesl/gifenc) by Matt DesLauriers (MIT).
+GIF encoding: [gifenc](https://github.com/mattdesl/gifenc) by Matt DesLauriers (MIT). FIGlet rendering: [figlet.js](https://github.com/patorjk/figlet.js) by Patrick Gillespie (MIT), with fonts from its collection; each font keeps its author's notes in its header.
 
 Fonts, all under the SIL Open Font License 1.1 (licence texts in [`web/fonts`](web/fonts)): IBM Plex Sans, IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic and a subset of Noto Sans Symbols 2.
 

@@ -25,12 +25,15 @@
   const S = () => ctx.S;
   const is = (k, v) => () => S()[k] === v;
   const hasTitle = () => !!String(S().title || '').trim();
+  const isText = () => ctx.kind() === 'text';
+  const isBanner = () => isText() && S().textMode === 'figlet';
+  const isImageText = () => isText() && S().textMode !== 'figlet';
 
   const TABS = [
     {
       id: 'glyphs', label: 'tab.glyphs', sections: [
         {
-          title: 'sec.mode', rows: [
+          title: 'sec.mode', when: () => !isBanner(), rows: [
             { k: 'mode', type: 'segmented', bare: true, options: [['ascii', 'modeAscii'], ['edges', 'modeEdges'], ['halftone', 'modeHalftone']] },
             { k: 'edgeThreshold', type: 'range', min: 5, max: 95, step: 1, unit: '%', when: is('mode', 'edges') },
             { k: 'edgeGlyphs', type: 'segmented', options: [['ascii', 'edgeAscii'], ['box', 'edgeBox']], when: is('mode', 'edges') },
@@ -40,20 +43,21 @@
           ]
         },
         {
-          title: 'sec.charset', when: () => S().mode !== 'halftone', rows: [
+          title: 'sec.charset', when: () => S().mode !== 'halftone' && !isBanner(), rows: [
             { type: 'charsets' },
             { k: 'inject', type: 'text', hint: 'injectHint', maxlength: 64 }
           ]
         },
         {
           title: 'sec.grid', rows: [
-            { k: 'depth', type: 'range', min: 2, max: 64, step: 1 },
+            { type: 'hint', text: 'glyphsBannerHint', when: isBanner },
+            { k: 'depth', type: 'range', min: 2, max: 64, step: 1, when: () => !isBanner() },
             { k: 'cell', type: 'range', min: 4, max: 48, step: 1, unit: 'px' },
-            { k: 'grid', type: 'segmented', options: [['text', 'gridText'], ['square', 'gridSquare']] },
+            { k: 'grid', type: 'segmented', options: [['text', 'gridText'], ['square', 'gridSquare']], when: () => !isBanner() },
             { k: 'glyphFont', type: 'select', options: () => GF.FONTS.map((f) => [f.id, f.name]) },
             { k: 'glyphScale', type: 'range', min: 50, max: 160, step: 1, unit: '%' },
             { k: 'bold', type: 'check', label: 'glyphBold' },
-            { k: 'offset', type: 'range', min: 0, max: 32, step: 1, when: () => S().mode !== 'halftone' }
+            { k: 'offset', type: 'range', min: 0, max: 32, step: 1, when: () => S().mode !== 'halftone' && !isBanner() }
           ]
         }
       ]
@@ -125,15 +129,21 @@
         {
           title: 'sec.source', rows: [
             { type: 'sourceInfo' },
-            { k: 'text', type: 'textarea', label: 'textContent', maxlength: 200, when: () => ctx.kind() === 'text' },
-            { k: 'textFont', type: 'select', options: () => GF.FONTS.map((f) => [f.id, f.name]), when: () => ctx.kind() === 'text' },
-            { k: 'textWeight', type: 'segmented', options: [['regular', 'regular'], ['bold', 'bold']], when: () => ctx.kind() === 'text' },
-            { k: 'textAspect', type: 'segmented', wrap: true, options: () => GF.TEXT_ASPECTS.map((a) => [a, '']), when: () => ctx.kind() === 'text' },
+            { k: 'textMode', type: 'segmented', options: [['image', 'textModeImage'], ['figlet', 'textModeFiglet']], when: isText },
+            { k: 'text', type: 'textarea', label: 'textContent', maxlength: 200, when: isText },
+            { k: 'figletFont', type: 'select', options: () => GF.FIGLET_FONTS.map(([id, name]) => [id, name]), when: isBanner },
+            { type: 'fontGallery', when: isBanner },
+            { k: 'figletLayout', type: 'segmented', options: [['default', 'layoutDefault'], ['fitted', 'layoutFitted'], ['full', 'layoutFull']], when: isBanner },
+            { k: 'bannerGradient', type: 'segmented', wrap: true, options: [['vertical', 'gradV'], ['horizontal', 'gradH'], ['diagonal', 'gradD'], ['flat', 'gradFlat']], when: isBanner },
+            { type: 'hint', text: 'bannerHint', when: isBanner },
+            { k: 'textFont', type: 'select', options: () => GF.FONTS.map((f) => [f.id, f.name]), when: isImageText },
+            { k: 'textWeight', type: 'segmented', options: [['regular', 'regular'], ['bold', 'bold']], when: isImageText },
+            { k: 'textAspect', type: 'segmented', wrap: true, options: () => GF.TEXT_ASPECTS.map((a) => [a, '']), when: isImageText },
             { k: 'mirror', type: 'check', when: () => ctx.kind() === 'webcam' }
           ]
         },
         {
-          title: 'sec.framing', rows: [
+          title: 'sec.framing', when: () => !isBanner(), rows: [
             { k: 'frame', type: 'segmented', wrap: true, options: [['source', 'frameSource'], ['1:1', ''], ['4:5', ''], ['9:16', ''], ['16:9', ''], ['3:2', ''], ['21:9', '']] },
             { k: 'frameZoom', type: 'range', min: 1, max: 4, step: 0.05, unit: '×' },
             { k: 'frameX', type: 'range', min: -100, max: 100, step: 1 },
@@ -143,7 +153,7 @@
           ]
         },
         {
-          title: 'sec.output', rows: [
+          title: 'sec.output', when: () => !isBanner(), rows: [
             { k: 'outWidth', type: 'range', min: 320, max: 2400, step: 20, unit: 'px' },
             { k: 'outWidth', type: 'segmented', wrap: true, id: 'widthChips', bare: true, options: [[720, ''], [1080, ''], [1440, ''], [1920, ''], [2400, '']] }
           ]
@@ -340,6 +350,7 @@
       case 'customPalette': return customPalette();
       case 'sourceInfo': return sourceInfo();
       case 'frameButtons': return frameButtons();
+      case 'fontGallery': return { node: el('div', { class: 'btn-row' }, [el('button', { type: 'button', class: 'btn small', text: t('browseFonts'), onclick: () => ctx.openFonts() })]), sync() {} };
       case 'hint': return { node: el('small', { class: 'hint', text: t(row.text) }), sync() {} };
       default:
         void s;

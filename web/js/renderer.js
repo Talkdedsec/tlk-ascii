@@ -279,6 +279,7 @@
       const scale = opt.scale || 1;
       const time = opt.time || 0;
       if (!src || !src.width || !src.height) return null;
+      if (src.grid) return this.renderGrid(src, s, target, opt);
 
       const geo = this.geometry(src.width, src.height, s, scale);
       const { cw, ch, cols, rows, W, H } = geo;
@@ -482,8 +483,18 @@
         }
       }
 
-      /* 4. stamp coloured glyphs straight into pixel memory: one pass,
-         no per-cell draw calls (cells never overlap) */
+      /* 4–5. stamp glyphs, then light, title and screen effects */
+      this.stamp(idx, colors, glyphs, cols, rows, cw, ch, W, H, 0, 0);
+      this.composite(target, W, H, s, scale, time);
+
+      const result = { cols, rows, cw, ch, W, H, idx, colors, glyphs, ramp, settings: s };
+      if (!opt.keepLast) this.last = result;
+      return { cols, rows, W, H, ms: performance.now() - t0 };
+    }
+
+    /* Coloured glyphs written straight into pixel memory: one pass, no
+       per-cell draw calls (cells never overlap). ox/oy offset the grid. */
+    stamp(idx, colors, glyphs, cols, rows, cw, ch, W, H, ox, oy) {
       size(this.glyph, W, H);
       if (!this.glyphImg || this.glyphImg.width !== W || this.glyphImg.height !== H) {
         this.glyphImg = new ImageData(W, H);
@@ -492,7 +503,7 @@
       const buf = this.glyphBuf;
       buf.fill(0);
       for (let y = 0; y < rows; y++) {
-        const rowBase = y * ch * W;
+        const rowBase = (oy + y * ch) * W + ox;
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x;
           const gi = idx[i];
@@ -523,10 +534,10 @@
           }
         }
       }
-      const gc = this.glyph.getContext('2d');
-      gc.putImageData(this.glyphImg, 0, 0);
+      this.glyph.getContext('2d').putImageData(this.glyphImg, 0, 0);
+    }
 
-      /* 5. composite */
+    composite(target, W, H, s, scale, time) {
       size(target, W, H);
       const o = target.getContext('2d');
       o.save();
@@ -548,8 +559,54 @@
       if (s.grain > 0) this.drawGrain(o, W, H, s.grain / 100, time, scale, s.transparent);
       o.restore();
       if (s.curvature > 0) this.drawCurvature(target, s.curvature / 100, s.transparent);
+    }
 
-      const result = { cols, rows, cw, ch, W, H, idx, colors, glyphs, ramp, settings: s };
+    /* A source that is already text (a FIGlet banner): every character is
+       drawn as it is; colour runs along a gradient across the banner. */
+    renderGrid(src, s, target, opt) {
+      const t0 = performance.now();
+      const scale = opt.scale || 1;
+      const lines = src.grid;
+      const rows = Math.max(1, lines.length);
+      const cols = Math.max(1, ...lines.map((l) => Array.from(l).length));
+      const ch = Math.max(2, Math.round(s.cell * 1.6 * scale));
+      const cw = Math.max(2, Math.round(ch * 0.6));
+      const ox = cw * 3, oy = ch * 2;
+      const W = cols * cw + ox * 2, H = rows * ch + oy * 2;
+      const chars = Array.from(new Set(lines.join('').replace(/\s/g, ''))).join('') || '#';
+      const fontSize = Math.max(2, Math.round(ch * 0.92 * (s.glyphScale / 100)));
+      const cells = this.atlas(chars, s.glyphFont, s.bold, fontSize, cw, ch, { sort: false }).cells;
+      const byChar = new Map(cells.map((c, k) => [c.chr, k]));
+      const lut = this.lut(s.colorMode === 'palette' || s.colorMode === 'source' ? GF.paletteStops(s.palette, s) : ['#ffffff', '#ffffff']);
+      const single = GF.hexToRgb(s.color);
+      const fade = clamp(s.fade / 100, 0, 1);
+      const total = cols * rows;
+      const idx = new Int16Array(total).fill(-1);
+      const colors = new Uint8ClampedArray(total * 4);
+      const dir = s.bannerGradient;
+      for (let y = 0; y < rows; y++) {
+        const row = Array.from(lines[y] || '');
+        for (let x = 0; x < row.length; x++) {
+          const k = byChar.get(row[x]);
+          if (k == null) continue;
+          const i = y * cols + x;
+          idx[i] = k;
+          const u = cols > 1 ? x / (cols - 1) : 0.5;
+          const v = rows > 1 ? y / (rows - 1) : 0.5;
+          const tone = dir === 'horizontal' ? u : dir === 'diagonal' ? (u + v) / 2 : dir === 'flat' ? 1 : 1 - v;
+          const p = i * 4;
+          if (s.colorMode === 'single') {
+            colors[p] = single[0]; colors[p + 1] = single[1]; colors[p + 2] = single[2];
+          } else {
+            const li = (clamp(0.25 + tone * 0.75, 0, 1) * 255) | 0;
+            colors[p] = lut[li * 3]; colors[p + 1] = lut[li * 3 + 1]; colors[p + 2] = lut[li * 3 + 2];
+          }
+          colors[p + 3] = (1 - fade * 0.5 + fade * 0.5 * tone) * 255;
+        }
+      }
+      this.stamp(idx, colors, cells, cols, rows, cw, ch, W, H, ox, oy);
+      this.composite(target, W, H, s, scale, opt.time || 0);
+      const result = { cols, rows, cw, ch, W, H, idx, colors, glyphs: cells, ramp: cells, settings: s };
       if (!opt.keepLast) this.last = result;
       return { cols, rows, W, H, ms: performance.now() - t0 };
     }

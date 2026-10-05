@@ -59,6 +59,10 @@
     textFont: 'unifraktur',
     textAspect: '16:9',
     textWeight: 'regular',
+    textMode: 'image',
+    figletFont: 'ansi-shadow',
+    figletLayout: 'default',
+    bannerGradient: 'vertical',
     mirror: true,
     pngScale: 2,
     pngTrim: false,
@@ -187,6 +191,15 @@
         dither: 'atkinson', depth: 2, charSet: 'blocks/shade', grid: 'square', cell: 5, outWidth: 1200,
         colorMode: 'single', color: '#e9e4d8', fade: 0, gamma: 1.2, threshold: 0, glow: 25, glowRadius: 3,
         vignette: 0, grain: 25
+      }
+    },
+    {
+      id: 'banner', name: n('FIGlet banner', 'FIGlet başlık'),
+      source: { type: 'text' },
+      credit: 'ANSI Shadow FIGlet font, figlet.js (MIT).',
+      settings: {
+        text: 'TLK\nASCII', textMode: 'figlet', figletFont: 'ansi-shadow', bannerGradient: 'vertical',
+        palette: 'neon/synthwave', cell: 10, glow: 120, glowRadius: 7, fade: 20, vignette: 25, scanlines: 18
       }
     },
     {

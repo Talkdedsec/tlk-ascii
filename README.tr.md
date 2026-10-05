@@ -17,7 +17,7 @@
 
 TLK ASCII; resimleri, videoları, GIF'leri, kamera görüntüsünü ve düz yazıyı parlayan ASCII sanatına çevirir. 26 hazır görünümden biriyle başla ya da kendininkini kur: üç çizim modu (ASCII, kenar çizgileri, yarım ton), dithering, 38 karakter seti (klasik rampalar, braille, bloklar, kart takımları, runlar, katakana…), 24 palet ve kendi paletin, parlama, CRT ekran bükülmesi, tarama çizgileri, film greni, gotik başlık ve hareket. Her formata göre kadrajla, orijinalle karşılaştır, her adımı geri al; sonra PNG, GIF, video, SVG, HTML veya metin olarak dışa aktar.
 
-Her şey senin cihazında çalışır: GitHub Pages üzerinden tarayıcıda ya da internetsiz çalışan bir Windows programı olarak. Arayüz **Türkçe ve İngilizce**.
+Her şey senin cihazında çalışır: GitHub Pages üzerinden tarayıcıda (uygulama olarak kurulabilir, internetsiz çalışır) ya da internetsiz bir Windows programı olarak. Geri döndüğünde son ayarların seni bekler. Arayüz **Türkçe ve İngilizce**.
 
 ## Demolar
 
@@ -27,7 +27,7 @@ Her demo bir kaynak ve eksiksiz bir ayar seti yükler. Uygulamada açmak için b
 |:-:|:-:|:-:|:-:|:-:|
 | [![Memento mori](web/demos/previews/skull.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=skull)<br>Memento mori | [![Şövalye, Ölüm ve Şeytan](web/demos/previews/knight.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=knight)<br>Şövalye, Ölüm ve Şeytan | [![Ejderhanın runları](web/demos/previews/dragon.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=dragon)<br>Ejderhanın runları | [![Yaldızlı gergedan](web/demos/previews/rhino.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=rhino)<br>Yaldızlı gergedan | [![Dövme miğfer](web/demos/previews/helmet.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=helmet)<br>Dövme miğfer |
 | [![Renkli otoportre](web/demos/previews/portrait.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=portrait)<br>Renkli otoportre | [![Fosfor Melankoli](web/demos/previews/melencolia.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=melencolia)<br>Fosfor Melankoli | [![Çizgi eskiz (kenar)](web/demos/previews/sketch.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=sketch)<br>Çizgi eskiz (kenar) | [![Renkli yarım ton](web/demos/previews/halftone.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=halftone)<br>Renkli yarım ton | [![Tek bit Atkinson](web/demos/previews/bitmap.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=bitmap)<br>Tek bit Atkinson |
-| [![Canlı ateş (hareketli)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Canlı ateş (hareketli) | [![Gotik başlık](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gotik başlık | [![Buhar plazma (hareketli)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Buhar plazma (hareketli) |   |   |
+| [![Canlı ateş (hareketli)](web/demos/previews/fire.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=fire)<br>Canlı ateş (hareketli) | [![Gotik başlık](web/demos/previews/gothic.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=gothic)<br>Gotik başlık | [![Buhar plazma (hareketli)](web/demos/previews/plasma.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=plasma)<br>Buhar plazma (hareketli) | [![FIGlet başlık](web/demos/previews/banner.jpg)](https://talkdedsec.github.io/tlk-ascii/#demo=banner)<br>FIGlet başlık |   |
 
 ![TLK ASCII çalışma alanı](docs/screenshot.jpg)
 
@@ -45,6 +45,7 @@ Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 | --- | --- |
 | Görünümler | Kendi resminle canlı önizlemeli 26 görünümlük galeri: arama, kategoriler, favoriler, kayıtlı ön ayarlar ve **Şaşırt beni** |
 | Kaynaklar | Resimler (PNG, JPG, WebP, AVIF…), hareketli GIF/WebP, video dosyaları, kamera, yazı, üretilmiş ateş ve plazma |
+| FIGlet başlıklar | Yazını önizleyen bir galeriyle 56 klasik harf fontu (ANSI Shadow, Slant, Bloody, DOS Rebel…); başlığı README veya terminal için birebir kopyala ya da gradyan ve parlamayla dışa aktar |
 | Çizim modları | Parlaklığa göre ASCII, **Kenar** (dış hatlar `\| / - \` ya da kutu çizgileriyle), **Yarım ton** (parlaklıkla büyüyen tek karakter) |
 | Dithering | Çok az karakterle yumuşak tonlar için Floyd–Steinberg, Atkinson veya Bayer |
 | Karakterler | 9 kategoride, görsel olarak seçilen 38 karakter seti; kendi karakterlerin (örneğin bir isim), 2–64 derinlik, hücre boyutu, metin veya kare ızgara, gotikler dahil 8 karakter fontu |
@@ -139,7 +140,7 @@ Demo görselleri, hepsi kamu malı veya CC0:
 - Albrecht Dürer, *Yirmi Sekiz Yaşında Otoportre*, 1500 ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Albrecht_D%C3%BCrer_-_1500_self-portrait_(High_resolution_and_detail).jpg))
 - *Kapalı Miğfer*, y. 1555, The Metropolitan Museum of Art ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Close_Helmet_MET_DT271729.jpg))
 
-GIF kodlama: Matt DesLauriers'ın [gifenc](https://github.com/mattdesl/gifenc) kütüphanesi (MIT).
+GIF kodlama: Matt DesLauriers'ın [gifenc](https://github.com/mattdesl/gifenc) kütüphanesi (MIT). FIGlet: Patrick Gillespie'nin [figlet.js](https://github.com/patorjk/figlet.js) kütüphanesi (MIT) ve koleksiyonundaki fontlar; her font başlığında yazarının notlarını korur.
 
 Fontlar, hepsi SIL Open Font License 1.1 altında (lisans metinleri [`web/fonts`](web/fonts) içinde): IBM Plex Sans, IBM Plex Mono, VT323, Press Start 2P, UnifrakturMaguntia, Pirata One, Grenze Gotisch, Jacquard 24, Noto Sans Runic ve Noto Sans Symbols 2'nin bir alt kümesi.
 

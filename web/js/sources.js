@@ -162,11 +162,28 @@
     let sig = '';
     return {
       kind: 'text', el: c, name: 'text', width: c.width, height: c.height, animated: false,
+      grid: null,
       update(time, s) {
-        const key = [s.text, s.textFont, s.textAspect, s.textWeight].join('|');
+        const key = [s.text, s.textFont, s.textAspect, s.textWeight, s.textMode, s.figletFont, s.figletLayout].join('|');
         if (key === sig && !this.dirty) return;
         sig = key;
         this.dirty = false;
+        if (s.textMode === 'figlet') {
+          /* a FIGlet banner is already text: hand the renderer a grid */
+          const lines = GF.Banner.lines(s.text, s.figletFont, s.figletLayout);
+          if (!lines) {
+            sig = '';
+            GF.Banner.load(s.figletFont).then(() => {
+              this.dirty = true;
+              if (this.onChange) this.onChange();
+            }, () => {});
+            if (!this.grid) this.grid = [' '];
+          } else this.grid = lines;
+          this.width = Math.max(1, ...this.grid.map((l) => l.length));
+          this.height = this.grid.length;
+          return;
+        }
+        this.grid = null;
         const [w, h] = ASPECTS[s.textAspect] || ASPECTS['16:9'];
         c.width = w;
         c.height = h;

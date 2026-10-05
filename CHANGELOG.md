@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0
+
+- FIGlet banners: 56 classic ASCII lettering fonts (ANSI Shadow, Slant, Bloody, DOS Rebel…) with a font gallery that previews your text. Copy text and TXT export give the banner exactly; PNG, GIF and video add colour gradients, glow and every screen effect.
+- The last settings and demo come back after a reload.
+- Installable web app with offline support (Install app in Chrome or Edge, Add to Home Screen on phones).
+- The desktop app says when a newer release is out.
+- New demo: FIGlet banner.
+
 ## 1.2.0
 
 - New three-part workspace: a looks gallery on the left, the artwork in the middle, settings on the right.

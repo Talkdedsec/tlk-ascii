@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' blob: data: https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>TLK ASCII</title>
   <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Looks gallery, edge and halftone modes, dithering, palettes, CRT effects; PNG, GIF, video, SVG and HTML export. Free and private, in your browser or as a Windows app.">
   <meta name="theme-color" content="#18181a">
@@ -14,6 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="icons/icon-64.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -163,6 +164,16 @@
     <div id="export-body"></div>
   </dialog>
 
+  <dialog id="dlg-fonts" class="dialog wide">
+    <header>
+      <h2 data-i18n="fontsTitle"></h2>
+      <button type="button" class="btn icon" data-close data-i18n-title="close">×</button>
+    </header>
+    <p class="muted" data-i18n="fontsBody"></p>
+    <input type="text" id="font-search" class="font-search" spellcheck="false" autocomplete="off">
+    <div class="font-grid" id="font-grid"></div>
+  </dialog>
+
   <dialog id="dlg-demos" class="dialog wide">
     <header>
       <h2 data-i18n="demosTitle"></h2>
@@ -198,6 +209,7 @@
     <p><a id="repo-link" href="#" target="_blank" rel="noopener" data-i18n="source"></a> · MIT</p>
   </dialog>
 
+  <script src="js/version.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/charsets.js"></script>
   <script src="js/palettes.js"></script>
@@ -207,6 +219,8 @@
   <script src="js/sources.js"></script>
   <script src="js/exporter.js"></script>
   <script src="js/vendor/gifenc.js"></script>
+  <script src="js/vendor/figlet.js"></script>
+  <script src="js/banner.js"></script>
   <script src="js/gif.js"></script>
   <script src="js/state.js"></script>
   <script src="js/ui.js"></script>
