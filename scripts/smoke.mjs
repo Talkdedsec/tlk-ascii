@@ -124,9 +124,11 @@ try {
   check(clipSize > 20000 && /\.(mp4|webm)$/.test(clip), `recorded ${download.suggestedFilename()} (${clipSize} bytes)`);
   await page.setInputFiles('#file', clip);
   await page.waitForFunction(() => /video/i.test(document.getElementById('status-src').textContent), null, { timeout: 15000 }).catch(() => {});
-  await page.waitForFunction(() => window.TLKASCII.text().replace(/\s/g, '').length > 100, null, { timeout: 8000 }).catch(() => {});
+  /* make any decoded, non-black frame produce glyphs */
+  await page.evaluate(() => window.TLKASCII.set({ threshold: 0, gamma: 2.5, contrast: 0, brightness: 0, invert: false }));
+  await page.waitForFunction(() => window.TLKASCII.text().replace(/\s/g, '').length > 200, null, { timeout: 10000 }).catch(() => {});
   const video = await page.evaluate(() => ({ src: document.getElementById('status-src').textContent, glyphs: window.TLKASCII.text().replace(/\s/g, '').length }));
-  check(/video/i.test(video.src) && video.glyphs > 20, `recording reopens as a video source (${video.src}, ${video.glyphs} glyphs)`);
+  check(/video/i.test(video.src) && video.glyphs > 200, `recording reopens as a playing video source (${video.src}, ${video.glyphs} glyphs)`);
   await rm(clip, { force: true });
 
   /* webcam (fake camera from the browser) */

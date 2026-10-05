@@ -146,14 +146,9 @@
     record(canvas, seconds, onTick) {
       const type = this.recorderType();
       if (!type || !canvas.captureStream) return null;
-      /* Frames are pushed by the render loop through frame(), so every
-         rendered picture is recorded even when the browser throttles timers. */
-      let stream = canvas.captureStream(0);
-      let track = stream.getVideoTracks()[0];
-      if (!track || typeof track.requestFrame !== 'function') {
-        stream = canvas.captureStream(30);
-        track = null;
-      }
+      /* A fixed-rate capture: clips recorded this way play back in every
+         browser. The render loop keeps painting while recording. */
+      const stream = canvas.captureStream(30);
       const rec = new window.MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 16000000 });
       const chunks = [];
       rec.ondataavailable = (e) => e.data && e.data.size && chunks.push(e.data);
@@ -174,12 +169,7 @@
         if (onTick) onTick(el);
         if (seconds && el >= seconds && rec.state === 'recording') rec.stop();
       }, 100);
-      if (track) track.requestFrame();
-      return {
-        done,
-        stop: () => rec.state === 'recording' && rec.stop(),
-        frame: () => track && rec.state === 'recording' && track.requestFrame()
-      };
+      return { done, stop: () => rec.state === 'recording' && rec.stop() };
     }
   };
 })(window.GF = window.GF || {});

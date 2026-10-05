@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Video recording is back to fixed-rate capture, so recorded clips play in every browser; empty recordings show an error instead of downloading.
+
 ## 1.1.0
 
 - New darkroom interface: neutral graphite, tabbed panel, accent colour taken from the current palette.
@@ -11,7 +15,6 @@
 - Before / after split view, undo and redo, editable slider values.
 - Export dialog with animated GIF, trimmed PNG and settings links.
 - Three new demos: line sketch, colour halftone, one-bit Atkinson.
-- Video recording pushes every rendered frame, so clips are never empty.
 
 ## 1.0.0
 

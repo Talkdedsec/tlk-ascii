@@ -248,7 +248,6 @@
     try {
       source.update(time, S);
       const info = renderer.render(source, S, out, { time, before: compare ? before : null });
-      if (recording) recording.frame();
       if (info) {
         const changed = !lastInfo || lastInfo.W !== info.W || lastInfo.H !== info.H;
         lastInfo = info;
