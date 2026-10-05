@@ -177,17 +177,31 @@
         const lines = String(s.text || ' ').split('\n');
         const family = GF.fontStack(s.textFont);
         const weight = s.textWeight === 'bold' ? '700 ' : '400 ';
-        let px = h;
-        ctx.font = weight + px + 'px ' + family;
-        const widest = Math.max(1, ...lines.map((l) => ctx.measureText(l).width));
-        px = Math.min((px * w * 0.9) / widest, (h * 0.86) / (lines.length * 1.08));
-        ctx.font = weight + Math.floor(px) + 'px ' + family;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        /* fit by the real ink bounds, so accents (Ş, Ö, İ) and tall
+           blackletter capitals are never cut off */
+        const probe = 200;
+        ctx.font = weight + probe + 'px ' + family;
+        const m = lines.map((l) => {
+          if (!l.trim()) return { left: 0, width: 0, asc: probe * 0.4, desc: 0 };
+          const t = ctx.measureText(l);
+          const left = t.actualBoundingBoxLeft || 0;
+          const width = left + (t.actualBoundingBoxRight || t.width);
+          return { left, width, asc: t.actualBoundingBoxAscent || probe * 0.8, desc: t.actualBoundingBoxDescent || probe * 0.2 };
+        });
+        const gap = probe * 0.14;
+        const blockW = Math.max(1, ...m.map((x) => x.width));
+        const blockH = m.reduce((a, x) => a + x.asc + x.desc, 0) + gap * (m.length - 1);
+        const k = Math.min((w * 0.9) / blockW, (h * 0.84) / blockH);
+        ctx.font = weight + probe * k + 'px ' + family;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#fff';
-        const lh = px * 1.08;
-        const y0 = h / 2 - (lh * lines.length) / 2 + lh / 2;
-        lines.forEach((l, i) => ctx.fillText(l, w / 2, y0 + i * lh));
+        let y = (h - blockH * k) / 2;
+        lines.forEach((l, i) => {
+          y += m[i].asc * k;
+          if (l.trim()) ctx.fillText(l, (w - m[i].width * k) / 2 + m[i].left * k, y);
+          y += (m[i].desc + gap) * k;
+        });
       },
       dispose() {}
     };

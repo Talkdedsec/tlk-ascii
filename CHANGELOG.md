@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.2
+
+- Fixed: pictures were cropped at the top and bottom on the default text grid since 1.1.0; framing now uses the output's real aspect ratio, and baked titles are no longer squashed.
+- Fixed: opening your own image, video, webcam or text after a demo kept the demo's title, inversion, cut-off and framing.
+- Fixed: Turkish accents and tall blackletter capitals were cut off in text sources; blackletter fonts fall back to Pirata One for missing letters.
+- Fixed: webcam GIFs were a single repeated frame.
+- Fixed: the last panel tab could be clipped.
+- Rendering is 5–8× faster (glyphs are written straight into pixel memory), so sliders respond immediately.
+- Look thumbnails use their own renderer and no longer slow down the main preview.
+
 ## 1.1.1
 
 - Video recording is back to fixed-rate capture, so recorded clips play in every browser; empty recordings show an error instead of downloading.

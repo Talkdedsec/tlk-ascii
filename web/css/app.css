@@ -177,11 +177,11 @@ body.recording .rec-badge { display: flex; }
 
 /* ---------- panel ---------- */
 .panel { width: 348px; flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-left: 1px solid var(--line); }
-.tabs { display: flex; gap: 2px; padding: 0 8px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs { display: flex; padding: 0 6px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
 .tabs button {
   position: relative;
-  flex: none;
-  padding: 11px 8px 10px;
+  flex: 1 1 auto;
+  padding: 11px 5px 10px;
   border: 0;
   background: none;
   color: var(--muted);
@@ -191,7 +191,7 @@ body.recording .rec-badge { display: flex; }
 }
 .tabs button:hover { color: var(--text); }
 .tabs button[aria-selected="true"] { color: var(--text); }
-.tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; background: var(--accent); }
+.tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 5px; right: 5px; bottom: -1px; height: 2px; background: var(--accent); }
 .panel-body { flex: 1; overflow-y: auto; scrollbar-color: var(--line-2) transparent; }
 .sec { padding: 14px 14px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 11px; }
 .sec:last-child { border-bottom: 0; }

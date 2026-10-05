@@ -35,9 +35,12 @@
     const transparent = !!settings.transparent;
     const format = transparent ? 'rgba4444' : 'rgb565';
 
+    const live = source.kind === 'webcam';
     async function frame(f) {
       const t = f / fps;
       if (video) await seek(video, t);
+      /* a camera cannot be seeked: wait for real time to pass instead */
+      if (live && f > 0) await new Promise((r) => setTimeout(r, 1000 / fps));
       source.update(t, settings);
       renderer.render(source, settings, canvas, { scale, time: t, keepLast: true });
       return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);

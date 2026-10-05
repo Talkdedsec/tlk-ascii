@@ -12,6 +12,7 @@
 
   const S = Object.assign({}, GF.DEFAULTS);
   const renderer = new GF.Renderer();
+  const thumbRenderer = new GF.Renderer();
   const out = $('#out');
   const before = $('#before');
   const frameBox = $('#frame');
@@ -141,6 +142,7 @@
       .catch(() => {})
       .then(() => {
         renderer.clearCache();
+        thumbRenderer.clearCache();
         if (source && source.kind === 'text') source.dirty = true;
         invalidate();
       });
@@ -155,6 +157,21 @@
 
   /* ---------- sources ---------- */
 
+  /* Settings that belong to one particular picture. When you leave a demo
+     for your own image, video, webcam or text they go back to defaults;
+     the look (glyphs, colour, effects) stays. */
+  const PICTURE_KEYS = ['invert', 'brightness', 'contrast', 'gamma', 'threshold', 'saturation', 'inject',
+    'title', 'frame', 'frameZoom', 'frameX', 'frameY', 'rotate', 'flipX', 'outWidth'];
+
+  function leaveDemo() {
+    if (!currentDemo) return;
+    const reset = {};
+    PICTURE_KEYS.forEach((k) => (reset[k] = GF.DEFAULTS[k]));
+    Object.assign(S, reset);
+    afterBulk();
+    undo.touch();
+  }
+
   async function setSource(promise, demo) {
     const token = ++sourceToken;
     stage.classList.add('busy');
@@ -165,6 +182,7 @@
         return false;
       }
       if (source) source.dispose();
+      if (!demo) leaveDemo();
       source = src;
       currentDemo = demo || null;
       playing = true;
@@ -421,7 +439,7 @@
     const s = Object.assign({}, S, look, { title: '', anim: 'none' });
     const scale = Math.min(1, 300 / S.outWidth);
     try {
-      renderer.render(source, s, canvas, { scale, time: now(), keepLast: true });
+      thumbRenderer.render(source, s, canvas, { scale, time: now(), keepLast: true });
     } catch (e) { /* a thumbnail is not worth an error */ }
   }
 
@@ -679,7 +697,10 @@
   }
 
   function openExport() {
-    if (!source) return;
+    if (!source) {
+      toast(t('sourceNone'), true);
+      return;
+    }
     const dlg = $('#dlg-export');
     $('#export-body').replaceChildren(exportControls());
     if (!dlg.open) dlg.showModal();

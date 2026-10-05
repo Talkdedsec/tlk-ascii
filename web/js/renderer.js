@@ -25,9 +25,13 @@
     { id: 'system', name: 'System mono', family: 'ui-monospace, Consolas, "Courier New"' }
   ];
 
+  /* Blackletter faces fall back to another blackletter (Pirata One covers
+     every Turkish letter) before the mono fallback. */
+  const BLACKLETTER = ['unifraktur', 'grenze', 'jacquard'];
+
   GF.fontStack = function (id) {
     const f = GF.FONTS.find((x) => x.id === id) || GF.FONTS[0];
-    return f.family + ', ' + FALLBACK_STACK;
+    return f.family + ', ' + (BLACKLETTER.includes(f.id) ? '"Pirata One", ' : '') + FALLBACK_STACK;
   };
 
   /* Edge glyphs in orientation order: vertical, rising, horizontal, falling. */
@@ -35,6 +39,9 @@
     ascii: ['|', '/', '-', '\\'],
     box: ['│', '╱', '─', '╲']
   };
+
+  /* pixel packing for Uint32 writes into ImageData */
+  const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
 
   const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
@@ -129,7 +136,6 @@
       this.sample = mk();
       this.sample2 = mk();
       this.glyph = mk();
-      this.colorMap = mk();
       this.tint = mk();
       this.blur = mk();
       this.warp = mk();
@@ -206,11 +212,17 @@
       const data = g.getImageData(0, 0, canvas.width, canvas.height).data;
       const area = cw * ch * 255;
       for (const c of cells) {
+        const mask = new Uint8Array(cw * ch);
         let sum = 0;
+        let k = 0;
         for (let yy = c.y; yy < c.y + ch; yy++) {
           let p = (yy * canvas.width + c.x) * 4 + 3;
-          for (let xx = 0; xx < cw; xx++, p += 4) sum += data[p];
+          for (let xx = 0; xx < cw; xx++, p += 4) {
+            mask[k++] = data[p];
+            sum += data[p];
+          }
         }
+        c.mask = mask;
         c.density = sum / area;
       }
       if (opts.sort !== false && !opts.sizes) cells.sort((a, b) => a.density - b.density);
@@ -272,9 +284,15 @@
       const { cw, ch, cols, rows, W, H } = geo;
       const total = cols * rows;
 
-      /* 1. frame, sample */
-      const compW = Math.min(4096, cols * 4);
-      const compH = Math.min(4096, rows * 4);
+      /* 1. frame, sample. The work canvas has the output's aspect ratio
+         (cells are not square), so framing and titles are never distorted;
+         sampling then squeezes it onto the cell grid. */
+      let compW = Math.min(4096, cols * 4);
+      let compH = Math.round((compW * H) / W);
+      if (compH > 4096) {
+        compW = Math.max(1, Math.round((compW * 4096) / compH));
+        compH = 4096;
+      }
       let cc;
       try {
         cc = this.compose(src, s, compW, compH);
@@ -464,28 +482,49 @@
         }
       }
 
-      /* 4. stamp glyphs, then colour them */
+      /* 4. stamp coloured glyphs straight into pixel memory: one pass,
+         no per-cell draw calls (cells never overlap) */
       size(this.glyph, W, H);
-      const gc = this.glyph.getContext('2d');
-      gc.globalCompositeOperation = 'source-over';
-      gc.globalAlpha = 1;
-      gc.clearRect(0, 0, W, H);
+      if (!this.glyphImg || this.glyphImg.width !== W || this.glyphImg.height !== H) {
+        this.glyphImg = new ImageData(W, H);
+        this.glyphBuf = new Uint32Array(this.glyphImg.data.buffer);
+      }
+      const buf = this.glyphBuf;
+      buf.fill(0);
       for (let y = 0; y < rows; y++) {
-        const py = y * ch;
+        const rowBase = y * ch * W;
         for (let x = 0; x < cols; x++) {
-          const gi = idx[y * cols + x];
+          const i = y * cols + x;
+          const gi = idx[i];
           if (gi < 0) continue;
-          const c = glyphs[gi];
-          gc.drawImage(c.canvas, c.x, c.y, cw, ch, x * cw, py, cw, ch);
+          const mask = glyphs[gi].mask;
+          const p = i * 4;
+          const a = colors[p + 3];
+          if (!a) continue;
+          let m = 0;
+          if (LITTLE_ENDIAN) {
+            const rgb = (colors[p + 2] << 16) | (colors[p + 1] << 8) | colors[p];
+            for (let yy = 0; yy < ch; yy++) {
+              let o = rowBase + yy * W + x * cw;
+              for (let xx = 0; xx < cw; xx++, o++, m++) {
+                const ma = mask[m];
+                if (ma) buf[o] = ((((ma * a + 127) / 255) | 0) << 24 | rgb) >>> 0;
+              }
+            }
+          } else {
+            const rgb = ((colors[p] << 24) | (colors[p + 1] << 16) | (colors[p + 2] << 8)) >>> 0;
+            for (let yy = 0; yy < ch; yy++) {
+              let o = rowBase + yy * W + x * cw;
+              for (let xx = 0; xx < cw; xx++, o++, m++) {
+                const ma = mask[m];
+                if (ma) buf[o] = (rgb | (((ma * a + 127) / 255) | 0)) >>> 0;
+              }
+            }
+          }
         }
       }
-      size(this.colorMap, cols, rows);
-      this.colorMap.getContext('2d').putImageData(new ImageData(colors, cols, rows), 0, 0);
-      gc.globalCompositeOperation = 'source-in';
-      gc.imageSmoothingEnabled = false;
-      gc.drawImage(this.colorMap, 0, 0, W, H);
-      gc.globalCompositeOperation = 'source-over';
-      gc.imageSmoothingEnabled = true;
+      const gc = this.glyph.getContext('2d');
+      gc.putImageData(this.glyphImg, 0, 0);
 
       /* 5. composite */
       size(target, W, H);

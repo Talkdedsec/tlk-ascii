@@ -39,6 +39,39 @@ try {
     if (shots) await page.screenshot({ path: `${shots}/${id}.png` });
   }
 
+  /* the whole picture is drawn: a white frame must reach all four edges,
+     on both grids */
+  await page.evaluate(async () => {
+    const c = document.createElement('canvas');
+    c.width = 900;
+    c.height = 600;
+    const g = c.getContext('2d');
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, 900, 600);
+    g.strokeStyle = '#fff';
+    g.lineWidth = 40;
+    g.strokeRect(20, 20, 860, 560);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const dt = new DataTransfer();
+    dt.items.add(new File([blob], 'frame.png', { type: 'image/png' }));
+    const input = document.getElementById('file');
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+  });
+  await page.waitForFunction(() => /frame\.png/.test(document.getElementById('status-src').textContent));
+  for (const grid of ['text', 'square']) {
+    await page.evaluate((g) => window.TLKASCII.set({ grid: g, charSet: 'blocks/shade', threshold: 10, glow: 0, vignette: 0 }), grid);
+    await settle(page);
+    const edges = await page.evaluate(() => {
+      const lines = window.TLKASCII.text().replace(/\n+$/, '').split('\n');
+      const full = (l) => l.replace(/\s/g, '').length;
+      const cols = Math.max(...lines.map((l) => l.length));
+      return { top: full(lines[0]) / cols, bottom: full(lines[lines.length - 1]) / cols, left: lines.filter((l) => l[0] && l[0] !== ' ').length / lines.length, right: lines.filter((l) => l.length >= cols - 1).length / lines.length, rows: lines.length };
+    });
+    check(edges.top > 0.8 && edges.bottom > 0.8 && edges.left > 0.8 && edges.right > 0.8,
+      `${grid} grid keeps the whole picture (edges top ${edges.top.toFixed(2)}, bottom ${edges.bottom.toFixed(2)}, left ${edges.left.toFixed(2)}, right ${edges.right.toFixed(2)})`);
+  }
+
   /* drawing modes and dithering */
   await page.evaluate(() => window.TLKASCII.loadDemo('helmet'));
   await page.evaluate(() => window.TLKASCII.set({ mode: 'edges', edgeFill: false }));
