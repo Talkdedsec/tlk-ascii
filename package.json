@@ -1,7 +1,7 @@
 {
   "name": "tlk-ascii",
   "productName": "TLK ASCII",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Image, video, webcam and text to glowing ASCII art. Looks, edge and halftone modes, dithering, palettes, CRT effects; PNG, GIF, video, SVG, HTML and TXT export.",
   "license": "MIT",
   "author": "Talkdedsec",

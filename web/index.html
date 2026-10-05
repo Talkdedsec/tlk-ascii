@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>TLK ASCII</title>
-  <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Looks, edge and halftone modes, dithering, palettes, CRT effects; PNG, GIF, video, SVG and HTML export. Free and private, in your browser or as a Windows app.">
+  <meta name="description" content="Turn images, videos, webcam footage and text into glowing ASCII art. Looks gallery, edge and halftone modes, dithering, palettes, CRT effects; PNG, GIF, video, SVG and HTML export. Free and private, in your browser or as a Windows app.">
   <meta name="theme-color" content="#18181a">
   <meta property="og:title" content="TLK ASCII">
   <meta property="og:description" content="Image, video and text to glowing ASCII art. Free and private.">
@@ -22,16 +22,10 @@
       <img src="icons/icon-64.png" alt="" width="22" height="22">
       <span>TLK ASCII</span>
     </a>
-    <nav class="bar-group" aria-label="Source">
-      <button type="button" class="btn" id="btn-open" data-i18n-title="openHint"><span data-i18n="open"></span></button>
-      <button type="button" class="btn" id="btn-webcam"><span data-i18n="webcam"></span></button>
-      <button type="button" class="btn" id="btn-text"><span data-i18n="text"></span></button>
-      <button type="button" class="btn" id="btn-demos"><span data-i18n="demos"></span></button>
-    </nav>
-    <div class="bar-group" aria-label="History">
-      <button type="button" class="btn icon" id="btn-undo" data-i18n-title="undo" disabled>↶</button>
-      <button type="button" class="btn icon" id="btn-redo" data-i18n-title="redo" disabled>↷</button>
-    </div>
+    <button type="button" class="cmd-trigger" id="btn-cmd">
+      <span data-i18n="cmdButton"></span>
+      <kbd>Ctrl K</kbd>
+    </button>
     <span class="spacer"></span>
     <a class="btn quiet web-only" id="download-link" href="#" target="_blank" rel="noopener" data-i18n-title="downloadApp">Windows</a>
     <label class="lang">
@@ -46,7 +40,37 @@
   </header>
 
   <main class="workspace">
+    <aside class="rail" id="rail" aria-label="Looks"></aside>
+
     <section class="stage busy" id="stage" aria-label="Preview">
+      <div class="toolbar" role="toolbar" aria-label="View">
+        <button type="button" class="btn icon quiet" id="btn-rail" aria-pressed="true" data-i18n-title="hideRail">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v10H2zM6 3v10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        </button>
+        <span class="status">
+          <span id="status-src" class="src"></span>
+          <span id="status-size" class="num muted"></span>
+          <span id="status-ms" class="num muted"></span>
+        </span>
+        <span class="spacer"></span>
+        <span class="tool-group">
+          <button type="button" class="btn icon quiet" id="btn-undo" data-i18n-title="undo" disabled>↶</button>
+          <button type="button" class="btn icon quiet" id="btn-redo" data-i18n-title="redo" disabled>↷</button>
+        </span>
+        <span class="tool-group">
+          <button type="button" class="btn small toggle" id="btn-compare" aria-pressed="false" data-i18n-title="compareHint"><span data-i18n="compare"></span></button>
+        </span>
+        <span class="tool-group">
+          <button type="button" class="btn icon quiet" id="zoom-out" data-i18n-title="zoomOut">−</button>
+          <button type="button" class="btn small quiet num" id="zoom-label" data-i18n-title="actual">100%</button>
+          <button type="button" class="btn icon quiet" id="zoom-in" data-i18n-title="zoomIn">+</button>
+          <button type="button" class="btn icon quiet" id="zoom-fit" data-i18n-title="fit">⤢</button>
+        </span>
+        <button type="button" class="btn icon quiet" id="btn-focus" data-i18n-title="focus">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        </button>
+      </div>
+
       <div class="viewport" id="viewport">
         <div class="frame" id="frame">
           <canvas id="out" width="1" height="1"></canvas>
@@ -54,6 +78,7 @@
           <div class="divider" aria-hidden="true"><span></span></div>
         </div>
       </div>
+
       <div class="empty-state">
         <h1 data-i18n="emptyTitle"></h1>
         <p data-i18n="emptyBody"></p>
@@ -71,20 +96,48 @@
         <span class="dot"></span><span data-i18n="recording"></span> <span id="rec-time"></span>
         <button type="button" class="btn small" id="rec-stop"><span data-i18n="stopRec"></span></button>
       </div>
-      <footer class="status">
-        <button type="button" class="btn icon small" id="btn-play" hidden>❚❚</button>
-        <span id="status-src" class="src"></span>
-        <span id="status-size" class="num"></span>
-        <span id="status-ms" class="num muted"></span>
-        <span class="spacer"></span>
-        <button type="button" class="btn small toggle" id="btn-compare" aria-pressed="false" data-i18n-title="compareHint"><span data-i18n="compare"></span></button>
-        <span class="zoom">
-          <button type="button" class="btn icon small" id="zoom-out" data-i18n-title="zoomOut">−</button>
-          <button type="button" class="btn small num" id="zoom-label" data-i18n-title="actual">100%</button>
-          <button type="button" class="btn icon small" id="zoom-in" data-i18n-title="zoomIn">+</button>
-          <button type="button" class="btn small" id="zoom-fit" data-i18n-title="fit">⤢</button>
-        </span>
-      </footer>
+
+      <div class="tips" id="tips" hidden>
+        <strong data-i18n="tipsTitle"></strong>
+        <ul>
+          <li data-i18n="tip1"></li>
+          <li data-i18n="tip2"></li>
+          <li data-i18n="tip3"></li>
+          <li data-i18n="tip4"></li>
+        </ul>
+        <button type="button" class="btn small" id="tips-close"><span data-i18n="gotIt"></span></button>
+      </div>
+
+      <div class="bottom">
+        <div class="timeline" id="timeline" hidden>
+          <button type="button" class="btn icon quiet" id="btn-play">❚❚</button>
+          <input type="range" id="time" min="0" max="1" step="0.01" value="0" aria-label="Timeline">
+          <span class="num muted" id="time-label">0.0 / 0.0</span>
+        </div>
+        <nav class="dock" aria-label="Source">
+          <button type="button" class="btn quiet" id="btn-open" data-i18n-title="openHint">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h4l1.5 1.5H14v7H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span data-i18n="open"></span>
+          </button>
+          <button type="button" class="btn quiet" id="btn-webcam">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="4" width="9" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 7l4-2v6l-4-2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span data-i18n="webcam"></span>
+          </button>
+          <button type="button" class="btn quiet" id="btn-text">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M8 4v9M6 13h4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+            <span data-i18n="text"></span>
+          </button>
+          <button type="button" class="btn quiet" id="btn-demos">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            <span data-i18n="demos"></span>
+          </button>
+          <span class="dock-sep" aria-hidden="true"></span>
+          <button type="button" class="btn quiet" id="btn-random" data-i18n-title="kRandom">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h3l6 8h3M2 12h3l1.5-2M9.5 6L11 4h3M12.5 2.5L14 4l-1.5 1.5M12.5 10.5L14 12l-1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <span data-i18n="randomLook"></span>
+          </button>
+        </nav>
+      </div>
     </section>
 
     <aside class="panel" aria-label="Settings">
@@ -93,8 +146,14 @@
     </aside>
   </main>
 
+  <button type="button" class="focus-exit" id="focus-exit" data-i18n-title="exitFocus">×</button>
   <input type="file" id="file" accept="image/*,video/*" hidden>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-text"></span><button type="button" class="toast-action" id="toast-action" hidden></button></div>
+
+  <dialog id="dlg-cmd" class="dialog cmd" aria-label="Search everything">
+    <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" aria-controls="cmd-list" aria-autocomplete="list">
+    <ul id="cmd-list" role="listbox"></ul>
+  </dialog>
 
   <dialog id="dlg-export" class="dialog wide">
     <header>
@@ -121,12 +180,14 @@
     <p data-i18n="aboutBody"></p>
     <h3 data-i18n="shortcuts"></h3>
     <dl class="keys">
+      <dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd data-i18n="kCommand"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>O</kbd></dt><dd data-i18n="kOpen"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>S</kbd></dt><dd data-i18n="kSave"></dd>
       <dt><kbd>E</kbd></dt><dd data-i18n="kExport"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>Z</kbd> · <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd></dt><dd data-i18n="kUndo"></dd>
       <dt><kbd>C</kbd></dt><dd data-i18n="kCompare"></dd>
       <dt><kbd>R</kbd></dt><dd data-i18n="kRandom"></dd>
+      <dt><kbd>H</kbd></dt><dd data-i18n="kFocus"></dd>
       <dt data-i18n="kPanKeys"></dt><dd data-i18n="kPan"></dd>
       <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd></dt><dd data-i18n="kCopy"></dd>
       <dt><kbd>F</kbd></dt><dd data-i18n="kFit"></dd>
@@ -150,6 +211,8 @@
   <script src="js/state.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/panel.js"></script>
+  <script src="js/rail.js"></script>
+  <script src="js/commands.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

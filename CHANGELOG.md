@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0
+
+- New three-part workspace: a looks gallery on the left, the artwork in the middle, settings on the right.
+- Looks gallery with search, categories, favourites (★) and saved presets, every tile a live render of your picture; 8 new looks (26 in all).
+- Command palette (Ctrl+K) for every action, look, demo, panel and language.
+- View toolbar above the canvas (undo, redo, before / after, zoom, focus mode) and a source dock below it.
+- Timeline with scrubbing for videos and animated GIFs.
+- Drag sideways on any setting label to change its value (Shift for fine steps).
+- Applying a look or preset shows a toast with Undo.
+- Focus mode (H) hides everything but the artwork.
+- A short tips card on the first visit.
+
 ## 1.1.2
 
 - Fixed: pictures were cropped at the top and bottom on the default text grid since 1.1.0; framing now uses the output's real aspect ratio, and baked titles are no longer squashed.

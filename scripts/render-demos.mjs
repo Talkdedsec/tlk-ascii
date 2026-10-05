@@ -138,7 +138,9 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.evaluate(() => {
     localStorage.setItem('tlk-ascii.lang', 'en');
-    localStorage.setItem('tlk-ascii.tab', 'looks');
+    localStorage.setItem('tlk-ascii.tab', 'glyphs');
+    localStorage.setItem('tlk-ascii.tips', 'done');
+    localStorage.setItem('tlk-ascii.rail', '1');
   });
   await page.goto(url + 'index.html#demo=skull');
   await page.evaluate(() => window.TLKASCII.ready);

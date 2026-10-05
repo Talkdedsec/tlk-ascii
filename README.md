@@ -15,7 +15,7 @@
 
 </div>
 
-TLK ASCII turns pictures, videos, GIFs, your webcam and plain text into ASCII art that glows. Start from one of 18 looks or build your own: three drawing modes (ASCII, edge lines, halftone), dithering, 38 character sets (classic ramps, braille, blocks, card suits, runes, katakana…), 24 palettes plus your own, glow, CRT curve, scanlines, film grain, a blackletter title and motion. Frame it for any format, compare with the original, undo anything, then export PNG, GIF, video, SVG, HTML or text.
+TLK ASCII turns pictures, videos, GIFs, your webcam and plain text into ASCII art that glows. Start from one of 26 looks or build your own: three drawing modes (ASCII, edge lines, halftone), dithering, 38 character sets (classic ramps, braille, blocks, card suits, runes, katakana…), 24 palettes plus your own, glow, CRT curve, scanlines, film grain, a blackletter title and motion. Frame it for any format, compare with the original, undo anything, then export PNG, GIF, video, SVG, HTML or text.
 
 It runs entirely on your device: in the browser through GitHub Pages, or as an offline Windows program. The interface is in **English and Turkish**.
 
@@ -35,7 +35,7 @@ Every demo loads a source and a complete set of settings. Click one to open it i
 
 1. [Open TLK ASCII](https://talkdedsec.github.io/tlk-ascii/).
 2. Drop an image or video on the page, paste one with <kbd>Ctrl</kbd>+<kbd>V</kbd>, or choose **Demos**.
-3. Click a look on the right, fine-tune it in the other tabs, then press **Export**.
+3. Pick a look from the gallery on the left, fine-tune it on the right, then press **Export**.
 
 No login, installation or upload is involved.
 
@@ -43,7 +43,7 @@ No login, installation or upload is involved.
 
 | Area | Details |
 | --- | --- |
-| Looks | 18 one-click looks with live thumbnails of your own picture, and **Surprise me** for random ones |
+| Looks | A gallery of 26 looks with live thumbnails of your own picture: search, categories, favourites, saved presets and **Surprise me** |
 | Sources | Images (PNG, JPG, WebP, AVIF…), animated GIF/WebP, video files, webcam, typed text, generated fire and plasma |
 | Drawing modes | ASCII by brightness, **Edges** (outlines drawn with `\| / - \` or box lines), **Halftone** (one glyph that grows with brightness) |
 | Dithering | Floyd–Steinberg, Atkinson or Bayer, for smooth tones with very few glyphs |
@@ -54,7 +54,8 @@ No login, installation or upload is involved.
 | Title | Blackletter or mono title, crisp on top or built from glyphs |
 | Motion | Cycle, flicker or wave the glyphs; videos and GIFs play live |
 | Framing | 1:1, 4:5, 9:16, 16:9, 3:2 and 21:9 frames, zoom, move (also <kbd>Alt</kbd> + drag), rotate, mirror |
-| Editing | Before / after split view, undo and redo, editable values, double-click to reset |
+| Editing | Before / after split view, undo and redo, drag any label to scrub its value, double-click to reset, timeline for videos and GIFs, focus mode |
+| Command palette | <kbd>Ctrl</kbd>+<kbd>K</kbd> finds every action, look, demo and panel |
 | Export | PNG at 1×–4× with optional trimming, animated GIF, video (MP4 where supported, otherwise WebM), SVG, HTML, TXT, clipboard |
 | Sharing | A link that carries all your settings; presets saved in the browser or as JSON |
 
@@ -86,7 +87,9 @@ It is the same app as the website and works completely offline. The executables 
 | --- | --- |
 | <kbd>Ctrl</kbd> <kbd>O</kbd> | Open a file |
 | <kbd>Ctrl</kbd> <kbd>S</kbd> | Save PNG |
+| <kbd>Ctrl</kbd> <kbd>K</kbd> | Search every action, look and demo |
 | <kbd>E</kbd> | Export |
+| <kbd>H</kbd> | Focus mode |
 | <kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> | Undo / redo |
 | <kbd>C</kbd> | Before / after |
 | <kbd>R</kbd> | Surprise me (random look) |

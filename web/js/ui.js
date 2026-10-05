@@ -53,6 +53,34 @@
     val.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') val.blur();
     });
+    /* drag sideways on the label to scrub the value; Shift for fine steps */
+    let scrub = null;
+    label.classList.add('scrub');
+    label.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      scrub = { x: e.clientX, v: Number(o.get()), moved: false };
+      label.setPointerCapture(e.pointerId);
+    });
+    label.addEventListener('pointermove', (e) => {
+      if (!scrub) return;
+      const dx = e.clientX - scrub.x;
+      if (!scrub.moved && Math.abs(dx) < 3) return;
+      if (!scrub.moved) document.body.classList.add('scrubbing');
+      scrub.moved = true;
+      const span = o.max - o.min;
+      let v = scrub.v + (dx * span * (e.shiftKey ? 0.15 : 1)) / 260;
+      v = Math.min(o.max, Math.max(o.min, Math.round(v / o.step) * o.step));
+      v = Number(v.toFixed(4));
+      input.value = v;
+      paint(v);
+      o.onInput(v);
+    });
+    const endScrub = () => {
+      scrub = null;
+      document.body.classList.remove('scrubbing');
+    };
+    label.addEventListener('pointerup', endScrub);
+    label.addEventListener('pointercancel', endScrub);
     label.addEventListener('dblclick', () => {
       if (o.reset == null) return;
       input.value = o.reset;

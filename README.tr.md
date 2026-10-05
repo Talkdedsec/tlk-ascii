@@ -15,7 +15,7 @@
 
 </div>
 
-TLK ASCII; resimleri, videoları, GIF'leri, kamera görüntüsünü ve düz yazıyı parlayan ASCII sanatına çevirir. 18 hazır görünümden biriyle başla ya da kendininkini kur: üç çizim modu (ASCII, kenar çizgileri, yarım ton), dithering, 38 karakter seti (klasik rampalar, braille, bloklar, kart takımları, runlar, katakana…), 24 palet ve kendi paletin, parlama, CRT ekran bükülmesi, tarama çizgileri, film greni, gotik başlık ve hareket. Her formata göre kadrajla, orijinalle karşılaştır, her adımı geri al; sonra PNG, GIF, video, SVG, HTML veya metin olarak dışa aktar.
+TLK ASCII; resimleri, videoları, GIF'leri, kamera görüntüsünü ve düz yazıyı parlayan ASCII sanatına çevirir. 26 hazır görünümden biriyle başla ya da kendininkini kur: üç çizim modu (ASCII, kenar çizgileri, yarım ton), dithering, 38 karakter seti (klasik rampalar, braille, bloklar, kart takımları, runlar, katakana…), 24 palet ve kendi paletin, parlama, CRT ekran bükülmesi, tarama çizgileri, film greni, gotik başlık ve hareket. Her formata göre kadrajla, orijinalle karşılaştır, her adımı geri al; sonra PNG, GIF, video, SVG, HTML veya metin olarak dışa aktar.
 
 Her şey senin cihazında çalışır: GitHub Pages üzerinden tarayıcıda ya da internetsiz çalışan bir Windows programı olarak. Arayüz **Türkçe ve İngilizce**.
 
@@ -35,7 +35,7 @@ Her demo bir kaynak ve eksiksiz bir ayar seti yükler. Uygulamada açmak için b
 
 1. [TLK ASCII'yi aç](https://talkdedsec.github.io/tlk-ascii/).
 2. Sayfaya bir resim ya da video sürükle, <kbd>Ctrl</kbd>+<kbd>V</kbd> ile yapıştır veya **Demolar**'dan birini seç.
-3. Sağdan bir görünüme tıkla, diğer sekmelerde ince ayar yap, sonra **Dışa aktar**'a bas.
+3. Soldaki galeriden bir görünüm seç, sağda ince ayar yap, sonra **Dışa aktar**'a bas.
 
 Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 
@@ -43,7 +43,7 @@ Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 
 | Bölüm | Ayrıntı |
 | --- | --- |
-| Görünümler | Kendi resminle canlı küçük önizlemeli 18 tek tık görünüm ve rastgele görünümler için **Şaşırt beni** |
+| Görünümler | Kendi resminle canlı önizlemeli 26 görünümlük galeri: arama, kategoriler, favoriler, kayıtlı ön ayarlar ve **Şaşırt beni** |
 | Kaynaklar | Resimler (PNG, JPG, WebP, AVIF…), hareketli GIF/WebP, video dosyaları, kamera, yazı, üretilmiş ateş ve plazma |
 | Çizim modları | Parlaklığa göre ASCII, **Kenar** (dış hatlar `\| / - \` ya da kutu çizgileriyle), **Yarım ton** (parlaklıkla büyüyen tek karakter) |
 | Dithering | Çok az karakterle yumuşak tonlar için Floyd–Steinberg, Atkinson veya Bayer |
@@ -54,7 +54,8 @@ Giriş yapmak, kurulum ya da dosya yüklemek gerekmez.
 | Başlık | Gotik ya da düz başlık; üstte net veya karakterlerden örülmüş |
 | Hareket | Karakter döngüsü, titreme veya dalga; videolar ve GIF'ler canlı oynar |
 | Kadraj | 1:1, 4:5, 9:16, 16:9, 3:2 ve 21:9 oranlar, yakınlaştırma, kaydırma (<kbd>Alt</kbd> + sürükle ile de), döndürme, aynalama |
-| Düzenleme | Önce / sonra bölünmüş görünüm, geri al ve ileri al, elle yazılabilen değerler, çift tıkla sıfırlama |
+| Düzenleme | Önce / sonra bölünmüş görünüm, geri al ve ileri al, etiketi sürükleyerek değer değiştirme, çift tıkla sıfırlama, video ve GIF için zaman çubuğu, odak modu |
+| Komut paleti | <kbd>Ctrl</kbd>+<kbd>K</kbd> her işlemi, görünümü, demoyu ve paneli bulur |
 | Dışa aktarma | İsteğe bağlı kırpmayla 1×–4× PNG, hareketli GIF, video (destekleniyorsa MP4, değilse WebM), SVG, HTML, TXT, pano |
 | Paylaşım | Tüm ayarlarını taşıyan bir link; tarayıcıda ya da JSON olarak saklanan ön ayarlar |
 
@@ -86,7 +87,9 @@ Web sitesiyle aynı uygulamadır ve tamamen internetsiz çalışır. Dosyalar ko
 | --- | --- |
 | <kbd>Ctrl</kbd> <kbd>O</kbd> | Dosya aç |
 | <kbd>Ctrl</kbd> <kbd>S</kbd> | PNG kaydet |
+| <kbd>Ctrl</kbd> <kbd>K</kbd> | Her işlemi, görünümü ve demoyu ara |
 | <kbd>E</kbd> | Dışa aktar |
+| <kbd>H</kbd> | Odak modu |
 | <kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> | Geri al / ileri al |
 | <kbd>C</kbd> | Önce / sonra |
 | <kbd>R</kbd> | Şaşırt beni (rastgele görünüm) |

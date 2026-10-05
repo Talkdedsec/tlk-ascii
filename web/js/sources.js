@@ -85,7 +85,7 @@
       const ctx = out.getContext('2d');
       return {
         kind: 'animation', el: out, name: file.name,
-        width: out.width, height: out.height, animated: true,
+        width: out.width, height: out.height, animated: true, duration: totalMs / 1000,
         update(time) {
           let t = (time * 1000) % totalMs;
           let f = frames[0];

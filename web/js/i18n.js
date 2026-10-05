@@ -65,7 +65,17 @@
       aboutCredits: 'Demo artwork: public domain and CC0 works from the National Gallery of Art, The Metropolitan Museum of Art and Wikimedia Commons. Fonts: SIL Open Font License. GIF encoding: gifenc (MIT).',
       source: 'Source code', shortcuts: 'Shortcuts',
       kOpen: 'Open a file', kSave: 'Save PNG', kExport: 'Export', kCopy: 'Copy text', kUndo: 'Undo / redo', kCompare: 'Before / after',
-      kRandom: 'Surprise me', kPanKeys: 'Alt + drag · Alt + wheel', kFit: 'Fit to screen', kPlay: 'Play / pause', kDemos: 'Demos', kPan: 'Move / zoom the picture'
+      kRandom: 'Surprise me', kPanKeys: 'Alt + drag · Alt + wheel', kFit: 'Fit to screen', kPlay: 'Play / pause', kDemos: 'Demos', kPan: 'Move / zoom the picture',
+      looksTitle: 'Looks', searchLooks: 'Search looks', filterAll: 'All', filterFav: 'Favourites', filterSaved: 'Saved',
+      favAdd: 'Add to favourites', favRemove: 'Remove from favourites', saveCurrent: 'Save current settings',
+      noFavs: 'Star a look and it stays here.', noMatch: 'No look matches.',
+      hideRail: 'Hide looks', showRail: 'Show looks', focus: 'Focus mode (H)', exitFocus: 'Show the interface (H or Esc)',
+      cmdButton: 'Search everything', cmdPlaceholder: 'Type a command, look, demo or setting…', cmdNone: 'Nothing found',
+      cmdActions: 'Actions', cmdLooks: 'Looks', cmdDemos: 'Demos', cmdPanels: 'Panels', cmdLanguage: 'Language',
+      applied: '{name} applied', undoAction: 'Undo',
+      tipsTitle: 'Getting around', tip1: 'Drop or paste any picture, GIF or video.', tip2: 'Click a look on the left, or press R for a random one.',
+      tip3: 'Drag across a number to change it; double-click a label to reset.', tip4: 'Ctrl+K finds every action, look and demo.', gotIt: 'Got it',
+      timeline: 'Timeline', kCommand: 'Search everything', kFocus: 'Focus mode'
     },
     tr: {
       tagline: 'Resim, video ve yazıdan parlayan ASCII sanatı',
@@ -129,7 +139,17 @@
       aboutCredits: 'Demo görselleri: National Gallery of Art, The Metropolitan Museum of Art ve Wikimedia Commons’tan kamu malı ve CC0 eserler. Fontlar: SIL Open Font License. GIF kodlama: gifenc (MIT).',
       source: 'Kaynak kodu', shortcuts: 'Kısayollar',
       kOpen: 'Dosya aç', kSave: 'PNG kaydet', kExport: 'Dışa aktar', kCopy: 'Metni kopyala', kUndo: 'Geri al / ileri al', kCompare: 'Önce / sonra',
-      kRandom: 'Şaşırt beni', kPanKeys: 'Alt + sürükle · Alt + tekerlek', kFit: 'Ekrana sığdır', kPlay: 'Oynat / duraklat', kDemos: 'Demolar', kPan: 'Resmi kaydır / yakınlaştır'
+      kRandom: 'Şaşırt beni', kPanKeys: 'Alt + sürükle · Alt + tekerlek', kFit: 'Ekrana sığdır', kPlay: 'Oynat / duraklat', kDemos: 'Demolar', kPan: 'Resmi kaydır / yakınlaştır',
+      looksTitle: 'Görünümler', searchLooks: 'Görünüm ara', filterAll: 'Tümü', filterFav: 'Favoriler', filterSaved: 'Kayıtlı',
+      favAdd: 'Favorilere ekle', favRemove: 'Favorilerden çıkar', saveCurrent: 'Mevcut ayarları kaydet',
+      noFavs: 'Bir görünümü yıldızla, burada kalsın.', noMatch: 'Eşleşen görünüm yok.',
+      hideRail: 'Görünümleri gizle', showRail: 'Görünümleri göster', focus: 'Odak modu (H)', exitFocus: 'Arayüzü göster (H veya Esc)',
+      cmdButton: 'Her şeyi ara', cmdPlaceholder: 'Komut, görünüm, demo veya ayar yaz…', cmdNone: 'Bir şey bulunamadı',
+      cmdActions: 'İşlemler', cmdLooks: 'Görünümler', cmdDemos: 'Demolar', cmdPanels: 'Paneller', cmdLanguage: 'Dil',
+      applied: '{name} uygulandı', undoAction: 'Geri al',
+      tipsTitle: 'Kısa rehber', tip1: 'Herhangi bir resim, GIF veya videoyu bırak ya da yapıştır.', tip2: 'Soldan bir görünüme tıkla ya da rastgele biri için R’ye bas.',
+      tip3: 'Bir sayının üstünde sürükleyerek değiştir; etikete çift tıklayınca sıfırlanır.', tip4: 'Ctrl+K her işlemi, görünümü ve demoyu bulur.', gotIt: 'Anladım',
+      timeline: 'Zaman çizelgesi', kCommand: 'Her şeyi ara', kFocus: 'Odak modu'
     }
   };
 

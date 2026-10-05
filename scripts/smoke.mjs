@@ -108,16 +108,39 @@ try {
   const afterRedo = await page.evaluate(() => window.TLKASCII.settings.glow);
   check(afterUndo !== 222 && afterRedo === 222, `undo restores glow (${afterUndo}), redo brings it back (${afterRedo})`);
 
-  /* looks */
-  await page.click('#tab-looks');
-  await page.waitForTimeout(1500);
-  const thumbs = await page.evaluate(() => [...document.querySelectorAll('.look canvas')].filter((c) => c.width > 40).length);
+  /* looks gallery: thumbnails, filters, search, favourites */
+  await page.waitForTimeout(2500);
+  const thumbs = await page.evaluate(() => [...document.querySelectorAll('#rail .look canvas')].filter((c) => c.width > 40).length);
   const lookCount = await page.evaluate(() => window.GF.LOOKS.length);
   check(thumbs === lookCount, `${thumbs}/${lookCount} look thumbnails rendered`);
-  await page.locator('.look').nth(2).click();
+  await page.locator('#rail .look-hit').nth(2).click();
   await settle(page);
-  const look = await page.evaluate(() => ({ p: window.TLKASCII.settings.palette, s: window.GF.LOOKS[2].s.palette }));
-  check(look.p === look.s, `clicking a look applies its palette (${look.p})`);
+  const look = await page.evaluate(() => ({ p: window.TLKASCII.settings.palette, s: window.GF.LOOKS[2].s.palette, toast: document.getElementById('toast-action').hidden }));
+  check(look.p === look.s && !look.toast, `clicking a look applies its palette (${look.p}) and offers undo`);
+  await page.locator('#rail .chip', { hasText: 'Terminal' }).click();
+  const terminal = await page.locator('#rail .look').count();
+  await page.fill('#rail .search', 'amber');
+  const searched = await page.locator('#rail .look').count();
+  check(terminal > 2 && terminal < lookCount && searched >= 1 && searched < terminal, `category filter shows ${terminal}, search "amber" shows ${searched}`);
+  await page.fill('#rail .search', '');
+  await page.locator('#rail .star').first().click();
+  await page.locator('#rail .chip', { hasText: 'Favourites' }).click();
+  check(await page.locator('#rail .look').count() === 1, 'starred look appears under favourites');
+  await page.locator('#rail .chip', { hasText: 'All' }).click();
+
+  /* command palette */
+  await page.keyboard.press('Control+k');
+  await page.keyboard.type('rune stone');
+  await page.keyboard.press('Enter');
+  await settle(page);
+  check(await page.evaluate(() => window.TLKASCII.settings.charSet) === 'medieval/futhark', 'Ctrl+K finds and applies a look');
+
+  /* focus mode */
+  await page.keyboard.press('h');
+  const focused = await page.evaluate(() => getComputedStyle(document.querySelector('.panel')).display === 'none');
+  await page.keyboard.press('Escape');
+  const back = await page.evaluate(() => getComputedStyle(document.querySelector('.panel')).display !== 'none');
+  check(focused && back, 'focus mode hides and restores the interface');
   await page.keyboard.press('r');
   await settle(page);
   check(await page.evaluate(glyphCount) > 0, 'random look still renders');
@@ -194,8 +217,8 @@ try {
 
   /* language */
   await page.selectOption('#lang', 'tr');
-  const tr = await page.textContent('#tab-looks');
-  check(tr.trim() === 'Görünüm', `Turkish tab label: "${tr.trim()}"`);
+  const tr = await page.textContent('#tab-glyphs');
+  check(tr.trim() === 'Karakter', `Turkish tab label: "${tr.trim()}"`);
   await page.selectOption('#lang', 'en');
 
   /* demos dialog */

@@ -38,14 +38,24 @@
   /* ---------- helpers ---------- */
 
   let toastTimer = 0;
-  function toast(msg, isError) {
+  let toastRun = null;
+  /* action: optional { label, run }, e.g. "Undo" after applying a look */
+  function toast(msg, isError, action) {
     const box = $('#toast');
-    box.textContent = msg;
+    $('#toast-text').textContent = msg;
+    const btn = $('#toast-action');
+    btn.hidden = !action;
+    toastRun = action ? action.run : null;
+    if (action) btn.textContent = action.label;
     box.classList.toggle('error', !!isError);
     box.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => box.classList.remove('show'), 2600);
+    toastTimer = setTimeout(() => box.classList.remove('show'), action ? 4200 : 2600);
   }
+  $('#toast-action').addEventListener('click', () => {
+    $('#toast').classList.remove('show');
+    if (toastRun) toastRun();
+  });
 
   const now = () => (playing ? (performance.now() - clockStart) / 1000 : pausedTime);
   const invalidate = () => (dirty = true);
@@ -111,12 +121,25 @@
     updateAccent();
     syncPlay();
     syncCanvasBg();
+    if (GF.Rail) GF.Rail.refresh();
     invalidate();
   }
 
-  function applyLook(look) {
+  const undoAction = () => ({ label: t('undoAction'), run: () => undo.undo() });
+
+  function applyLook(look, name) {
     setMany(look);
+    undo.flush();
+    if (name) toast(t('applied', { name }), false, undoAction());
   }
+
+  function loadPreset(settings, name) {
+    setMany(settings, GF.DEFAULTS);
+    undo.flush();
+    toast(t('applied', { name: name || t('presetLoaded') }), false, undoAction());
+  }
+
+  const randomLook = () => applyLook(GF.randomLook(), t('randomLook'));
 
   function updateAccent() {
     accentStale = S.colorMode === 'source';
@@ -190,6 +213,7 @@
       zoom = 'fit';
       stage.classList.remove('empty');
       GF.Panel.sourceChanged();
+      if (GF.Rail) GF.Rail.sourceChanged();
       syncPlay();
       syncStatusSource();
       accentStale = true;
@@ -271,6 +295,7 @@
         lastInfo = info;
         if (changed) applyZoom();
         updateStatus(info);
+        syncTimeline();
         if (accentStale && S.colorMode === 'source') {
           accentStale = false;
           GF.applyAccent(GF.accentFor(S, renderer.last));
@@ -315,9 +340,50 @@
     invalidate();
   }
 
+  /* ---------- timeline for videos and animated images ---------- */
+
+  function duration() {
+    if (!source) return 0;
+    if (source.kind === 'video') return isFinite(source.el.duration) ? source.el.duration : 0;
+    return source.duration || 0;
+  }
+
+  function currentTime() {
+    if (!source) return 0;
+    if (source.kind === 'video') return source.el.currentTime;
+    const d = duration();
+    return d ? now() % d : now();
+  }
+
+  const timeInput = $('#time');
+  let scrubbing = false;
+  function syncTimeline() {
+    const d = duration();
+    $('#timeline').classList.toggle('has-time', !!d);
+    timeInput.hidden = !d;
+    $('#time-label').hidden = !d;
+    if (!d || scrubbing) return;
+    const c = currentTime();
+    timeInput.max = d.toFixed(2);
+    timeInput.value = c.toFixed(2);
+    timeInput.style.setProperty('--p', ((c / d) * 100).toFixed(2) + '%');
+    $('#time-label').textContent = c.toFixed(1) + ' / ' + d.toFixed(1) + ' ' + t('seconds');
+  }
+  timeInput.addEventListener('input', () => {
+    scrubbing = true;
+    const v = parseFloat(timeInput.value);
+    timeInput.style.setProperty('--p', ((v / duration()) * 100).toFixed(2) + '%');
+    if (source && source.kind === 'video') source.el.currentTime = v;
+    else if (playing) clockStart = performance.now() - v * 1000;
+    else pausedTime = v;
+    $('#time-label').textContent = v.toFixed(1) + ' / ' + duration().toFixed(1) + ' ' + t('seconds');
+    invalidate();
+  });
+  timeInput.addEventListener('change', () => (scrubbing = false));
+
   function syncPlay() {
     const b = $('#btn-play');
-    b.hidden = !isAnimated();
+    $('#timeline').hidden = !isAnimated();
     b.textContent = playing ? '❚❚' : '▶';
     b.title = playing ? t('pause') : t('play');
     b.setAttribute('aria-label', b.title);
@@ -738,6 +804,8 @@
     GF.i18n.set(l);
     applyStaticText();
     GF.Panel.rebuild();
+    GF.Rail.rebuild();
+    setRail(!document.body.classList.contains('rail-closed'));
     syncPlay();
     syncStatusSource();
     if (lastInfo) updateStatus(lastInfo);
@@ -761,6 +829,11 @@
   $('#btn-redo').addEventListener('click', () => undo.redo());
   $('#btn-about').addEventListener('click', () => $('#dlg-about').showModal());
   $('#btn-play').addEventListener('click', togglePlay);
+  $('#btn-random').addEventListener('click', randomLook);
+  $('#btn-rail').addEventListener('click', () => setRail(document.body.classList.contains('rail-closed')));
+  $('#btn-focus').addEventListener('click', () => setFocus(true));
+  $('#focus-exit').addEventListener('click', () => setFocus(false));
+  $('#btn-cmd').addEventListener('click', () => GF.Commands.open());
   $('#btn-compare').addEventListener('click', () => setCompare(!compare));
   $('#rec-stop').addEventListener('click', () => recording && recording.stop());
   $('#zoom-in').addEventListener('click', () => zoomBy(1.25));
@@ -808,7 +881,10 @@
     const mod = e.ctrlKey || e.metaKey;
     const key = e.key.toLowerCase();
     if (document.querySelector('dialog[open]') && !mod) return;
-    if (mod && key === 'o') {
+    if (mod && key === 'k') {
+      e.preventDefault();
+      GF.Commands.open();
+    } else if (mod && key === 'o') {
       e.preventDefault();
       fileInput.click();
     } else if (mod && key === 's') {
@@ -832,7 +908,9 @@
       } else if (key === 'd') openDemos();
       else if (key === 'e') openExport();
       else if (key === 'c') setCompare(!compare);
-      else if (key === 'r') applyLook(GF.randomLook());
+      else if (key === 'r') randomLook();
+      else if (key === 'h') setFocus(!document.body.classList.contains('focus'));
+      else if (e.key === 'Escape' && document.body.classList.contains('focus')) setFocus(false);
       else if (e.key === '+' || e.key === '=') zoomBy(1.25);
       else if (e.key === '-') zoomBy(0.8);
     }
@@ -845,6 +923,82 @@
   $('#download-link').href = REPO + '/releases/latest';
   applyStaticText();
 
+  /* ---------- layout: looks rail, focus mode, tips ---------- */
+
+  const pref = {
+    get(k, d) {
+      try {
+        const v = localStorage.getItem('tlk-ascii.' + k);
+        return v == null ? d : v;
+      } catch (e) {
+        return d;
+      }
+    },
+    set(k, v) {
+      try {
+        localStorage.setItem('tlk-ascii.' + k, v);
+      } catch (e) { /* storage may be unavailable */ }
+    }
+  };
+
+  function setRail(open) {
+    document.body.classList.toggle('rail-closed', !open);
+    const b = $('#btn-rail');
+    b.setAttribute('aria-pressed', open ? 'true' : 'false');
+    b.title = open ? t('hideRail') : t('showRail');
+    b.setAttribute('aria-label', b.title);
+    pref.set('rail', open ? '1' : '0');
+    if (open) GF.Rail.shown();
+  }
+
+  function setFocus(on) {
+    document.body.classList.toggle('focus', on);
+    if (!on) GF.Rail.shown();
+  }
+
+  function showTips() {
+    if (pref.get('tips', '') === 'done') return;
+    $('#tips').hidden = false;
+  }
+  $('#tips-close').addEventListener('click', () => {
+    $('#tips').hidden = true;
+    pref.set('tips', 'done');
+  });
+
+  const plain = (k) => t(k).replace(/\s*\(.*\)$/, '');
+
+  function commandItems() {
+    const A = t('cmdActions');
+    const railOpen = !document.body.classList.contains('rail-closed');
+    const items = [
+      { group: A, label: plain('openHint'), hint: 'Ctrl O', run: () => fileInput.click() },
+      { group: A, label: t('webcam'), run: openWebcam },
+      { group: A, label: t('text'), run: openText },
+      { group: A, label: t('demos'), hint: 'D', run: openDemos },
+      { group: A, label: t('export'), hint: 'E', run: openExport },
+      { group: A, label: t('png'), hint: 'Ctrl S', run: exportPNG },
+      { group: A, label: t('gif'), keywords: 'gif animation', run: openExport },
+      { group: A, label: t('video'), keywords: 'mp4 webm record', run: openExport },
+      { group: A, label: t('copyText'), hint: 'Ctrl Shift C', run: copyText },
+      { group: A, label: t('shareLink'), run: async () => { await copyToClipboard(shareURL()); toast(t('linkCopied')); } },
+      { group: A, label: t('randomLook'), hint: 'R', run: randomLook },
+      { group: A, label: t('compare'), hint: 'C', run: () => setCompare(!compare) },
+      { group: A, label: plain('undo'), hint: 'Ctrl Z', run: () => undo.undo() },
+      { group: A, label: plain('redo'), hint: 'Ctrl Shift Z', run: () => undo.redo() },
+      { group: A, label: plain('focus'), hint: 'H', run: () => setFocus(true) },
+      { group: A, label: plain('fit'), hint: 'F', run: () => { zoom = 'fit'; applyZoom(); } },
+      { group: A, label: railOpen ? t('hideRail') : t('showRail'), run: () => setRail(!railOpen) },
+      { group: A, label: t('about'), run: () => $('#dlg-about').showModal() },
+      { group: A, label: t('reset'), run: () => loadPreset({}, t('reset')) }
+    ];
+    GF.LOOKS.forEach((l) => items.push({ group: t('cmdLooks'), label: nm(l.name), keywords: l.tag + ' ' + l.name.en + ' ' + l.name.tr, hidden: true, run: () => applyLook(GF.lookSettings(l), nm(l.name)) }));
+    GF.DEMOS.forEach((d) => items.push({ group: t('cmdDemos'), label: nm(d.name), keywords: d.name.en + ' ' + d.name.tr, hidden: true, run: () => loadDemo(d.id) }));
+    [['glyphs', 'tab.glyphs'], ['color', 'tab.color'], ['effects', 'tab.effects'], ['frame', 'tab.frame']].forEach(([id, k]) =>
+      items.push({ group: t('cmdPanels'), label: t(k), hidden: true, run: () => { setFocus(false); GF.Panel.setTab(id); } }));
+    [['en', 'English'], ['tr', 'Türkçe']].forEach(([l, label]) => items.push({ group: t('cmdLanguage'), label, hidden: true, keywords: 'language dil', run: () => setLang(l) }));
+    return items;
+  }
+
   GF.Panel.mount({
     S, set, setMany, applyLook, toast, renderThumb,
     kind,
@@ -855,6 +1009,9 @@
     togglePlay,
     restart
   });
+  GF.Rail.mount({ S, setMany, applyLook, loadPreset, toast, renderThumb, hasSource: () => !!source });
+  GF.Commands.init(commandItems);
+  setRail(pref.get('rail', innerWidth < 1200 ? '0' : '1') === '1');
   updateAccent();
   syncPlay();
   syncHistoryButtons();
@@ -880,6 +1037,7 @@
   const ready = loadAllFonts().then(openFromHash).then((ok) => {
     if (!source) stage.classList.add('empty');
     stage.classList.remove('busy');
+    showTips();
     syncPlay();
     return ok;
   });

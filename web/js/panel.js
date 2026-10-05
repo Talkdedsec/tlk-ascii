@@ -11,16 +11,15 @@
   const bindings = [];
   const tabButtons = {};
   const panes = {};
-  let activeTab = 'looks';
+  let activeTab = 'glyphs';
   let csCat = null;
   let csSeen = null;
   let palCat = null;
   let palSeen = null;
   let lastPalette = 'medieval/ember';
-  const thumbs = { tiles: [], timer: 0, token: 0, dirty: true };
 
   try {
-    activeTab = localStorage.getItem('tlk-ascii.tab') || 'looks';
+    activeTab = localStorage.getItem('tlk-ascii.tab') || 'glyphs';
   } catch (e) { /* storage may be unavailable */ }
 
   const S = () => ctx.S;
@@ -28,12 +27,6 @@
   const hasTitle = () => !!String(S().title || '').trim();
 
   const TABS = [
-    {
-      id: 'looks', label: 'tab.looks', sections: [
-        { title: 'sec.looks', rows: [{ type: 'looks' }] },
-        { title: 'sec.saved', rows: [{ type: 'presets' }] }
-      ]
-    },
     {
       id: 'glyphs', label: 'tab.glyphs', sections: [
         {
@@ -319,116 +312,6 @@
     return { node, sync() { flip.setAttribute('aria-pressed', S().flipX ? 'true' : 'false'); } };
   }
 
-  function looks() {
-    const grid = el('div', { class: 'looks' });
-    thumbs.tiles = GF.LOOKS.map((look) => {
-      const canvas = el('canvas', { width: 4, height: 3 });
-      const node = el('button', { type: 'button', class: 'look', onclick: () => ctx.applyLook(GF.lookSettings(look)) }, [
-        el('span', { class: 'look-img' }, [canvas]),
-        el('span', { class: 'look-name', text: nm(look.name) })
-      ]);
-      grid.append(node);
-      return { look, canvas };
-    });
-    const node = el('div', { class: 'looks-block' }, [
-      el('div', { class: 'btn-row' }, [el('button', { type: 'button', class: 'btn', text: t('randomLook') + '  (R)', onclick: () => ctx.applyLook(GF.randomLook()) })]),
-      el('small', { class: 'hint', text: t('looksHint') }),
-      grid
-    ]);
-    scheduleThumbs(50);
-    return { node, sync() {} };
-  }
-
-  function presets() {
-    const KEY = 'tlk-ascii.presets';
-    const read = () => {
-      try {
-        const v = JSON.parse(localStorage.getItem(KEY) || '[]');
-        return Array.isArray(v) ? v : [];
-      } catch (e) {
-        return [];
-      }
-    };
-    const write = (l) => {
-      try {
-        localStorage.setItem(KEY, JSON.stringify(l));
-        return true;
-      } catch (e) {
-        return false;
-      }
-    };
-    const name = el('input', { type: 'text', maxlength: 40, placeholder: t('presetName'), 'aria-label': t('presetName') });
-    const list = el('ul', { class: 'presets' });
-    const importInput = el('input', { type: 'file', accept: 'application/json,.json', hidden: true });
-    importInput.addEventListener('change', async () => {
-      const f = importInput.files[0];
-      importInput.value = '';
-      if (!f) return;
-      try {
-        const data = JSON.parse(await f.text());
-        ctx.setMany(data.settings || data, GF.DEFAULTS);
-        ctx.toast(t('presetLoaded'));
-      } catch (e) {
-        ctx.toast(t('openFailed'), true);
-      }
-    });
-    function render() {
-      const items = read();
-      if (!items.length) {
-        list.replaceChildren(el('li', { class: 'empty', text: t('noPresets') }));
-        return;
-      }
-      list.replaceChildren(...items.map((p, i) => el('li', {}, [
-        el('button', {
-          type: 'button', class: 'link', text: p.name, title: t('loadPreset'),
-          onclick: () => {
-            ctx.setMany(p.settings, GF.DEFAULTS);
-            ctx.toast(t('presetLoaded'));
-          }
-        }),
-        el('button', {
-          type: 'button', class: 'icon-btn', text: '×', title: t('deletePreset'), 'aria-label': t('deletePreset') + ': ' + p.name,
-          onclick: () => {
-            const l = read();
-            l.splice(i, 1);
-            write(l);
-            render();
-          }
-        })
-      ])));
-    }
-    const save = el('button', {
-      type: 'button', class: 'btn', text: t('savePreset'),
-      onclick: () => {
-        const n = name.value.trim() || 'Preset ' + (read().length + 1);
-        const l = read().filter((p) => p.name !== n);
-        l.unshift({ name: n, settings: Object.assign({}, S()) });
-        if (write(l.slice(0, 50))) {
-          name.value = '';
-          ctx.toast(t('presetSaved'));
-          render();
-        } else ctx.toast(t('renderFailed'), true);
-      }
-    });
-    const node = el('div', { class: 'preset-block' }, [
-      el('div', { class: 'inline-form' }, [name, save]),
-      list,
-      el('div', { class: 'btn-row' }, [
-        el('button', {
-          type: 'button', class: 'btn small', text: t('exportPreset'),
-          onclick: () => {
-            const blob = new Blob([JSON.stringify({ app: 'tlk-ascii', version: 2, settings: S() }, null, 2)], { type: 'application/json' });
-            GF.Exporter.download(blob, 'tlk-ascii-preset-' + GF.Exporter.stamp() + '.json');
-          }
-        }),
-        el('button', { type: 'button', class: 'btn small', text: t('importPreset'), onclick: () => importInput.click() }),
-        el('button', { type: 'button', class: 'btn small quiet', text: t('reset'), onclick: () => ctx.setMany({}, GF.DEFAULTS) })
-      ]),
-      importInput
-    ]);
-    return { node, sync: render };
-  }
-
   /* ---------- rows ---------- */
 
   function control(row) {
@@ -457,8 +340,6 @@
       case 'customPalette': return customPalette();
       case 'sourceInfo': return sourceInfo();
       case 'frameButtons': return frameButtons();
-      case 'looks': return looks();
-      case 'presets': return presets();
       case 'hint': return { node: el('small', { class: 'hint', text: t(row.text) }), sync() {} };
       default:
         void s;
@@ -494,7 +375,7 @@
       body.append(pane);
     }
     tabbar.addEventListener('keydown', onTabKey);
-    setTab(TABS.some((x) => x.id === activeTab) ? activeTab : 'looks');
+    setTab(TABS.some((x) => x.id === activeTab) ? activeTab : 'glyphs');
     sync();
   }
 
@@ -519,7 +400,6 @@
       tabButtons[k].tabIndex = on ? 0 : -1;
     }
     document.getElementById('panel').scrollTop = 0;
-    if (id === 'looks' && thumbs.dirty) scheduleThumbs(30);
   }
 
   /* Without a key everything refreshes; with one, only the matching row,
@@ -532,30 +412,8 @@
       if (!show || b.section) continue;
       if (!changed || wasHidden || b.id === changed || (DEPS[b.id] && DEPS[b.id].includes(changed))) b.sync();
     }
-    if (changed && !GF.LOOK_KEYS.includes(changed) && !GF.EXPORT_KEYS.includes(changed) && changed.charAt(0) !== '_') scheduleThumbs(450);
-  }
-
-  /* ---------- look thumbnails ---------- */
-
-  function scheduleThumbs(delay) {
-    thumbs.dirty = true;
-    if (activeTab !== 'looks' || !thumbs.tiles.length || !ctx || !ctx.hasSource()) return;
-    clearTimeout(thumbs.timer);
-    thumbs.timer = setTimeout(runThumbs, delay || 0);
-  }
-
-  function runThumbs() {
-    thumbs.dirty = false;
-    const token = ++thumbs.token;
-    let i = 0;
-    const step = () => {
-      if (token !== thumbs.token || activeTab !== 'looks') return;
-      const tile = thumbs.tiles[i++];
-      if (!tile) return;
-      ctx.renderThumb(tile.canvas, GF.lookSettings(tile.look));
-      setTimeout(step, 0);
-    };
-    step();
+    /* look thumbnails show the current picture, framing and tone */
+    if (changed && GF.Rail && !GF.LOOK_KEYS.includes(changed) && !GF.EXPORT_KEYS.includes(changed) && changed.charAt(0) !== '_') GF.Rail.refresh();
   }
 
   GF.Panel = {
@@ -568,7 +426,6 @@
     setTab,
     sourceChanged() {
       sync('_source');
-      scheduleThumbs(60);
     },
     get tab() {
       return activeTab;

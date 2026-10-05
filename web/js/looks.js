@@ -31,8 +31,35 @@
     { id: 'onebit', name: n('One-bit', 'Tek bit'), s: { dither: 'atkinson', depth: 2, charSet: 'blocks/shade', grid: 'square', colorMode: 'single', color: '#e9e4d8', glow: 0, fade: 0, vignette: 0 } },
     { id: 'bayer', name: n('Bayer amber', 'Bayer kehribar'), s: { dither: 'bayer', depth: 3, charSet: 'blocks/shade', palette: 'crt/amber', glow: 60, fade: 0, scanlines: 20 } },
     { id: 'source', name: n('True colour', 'Gerçek renk'), s: { colorMode: 'source', saturation: 140, glow: 50, fade: 25 } },
-    { id: 'fraktur', name: n('Fraktur', 'Fraktur'), s: { charSet: 'letters/upper', glyphFont: 'unifraktur', glyphScale: 115, palette: 'medieval/parchment', glow: 70, fade: 40 } }
+    { id: 'fraktur', name: n('Fraktur', 'Fraktur'), s: { charSet: 'letters/upper', glyphFont: 'unifraktur', glyphScale: 115, palette: 'medieval/parchment', glow: 70, fade: 40 } },
+    { id: 'blueprint', name: n('Blueprint', 'Mavi kopya'), s: { mode: 'edges', edgeGlyphs: 'box', edgeFill: false, edgeThreshold: 28, colorMode: 'single', color: '#a8d4ff', bg: '#0a1a33', glow: 45, fade: 0, vignette: 15 } },
+    { id: 'vapor', name: n('Vapour', 'Buhar'), s: { charSet: 'blocks/half', palette: 'neon/vapor', glow: 70, fade: 15, scanlines: 15 } },
+    { id: 'aurora', name: n('Aurora braille', 'Kutup braille'), s: { charSet: 'braille/full', depth: 48, palette: 'elements/aurora', glow: 110, fade: 35 } },
+    { id: 'ocean', name: n('Deep sea', 'Derin deniz'), s: { palette: 'elements/ocean', glow: 90, fade: 40, grain: 12 } },
+    { id: 'binary', name: n('Binary', 'İkili'), s: { charSet: 'letters/binary', palette: 'crt/phosphor', glyphFont: 'vt323', glow: 80, scanlines: 30, fade: 45 } },
+    { id: 'chess', name: n('Chess hall', 'Satranç salonu'), s: { charSet: 'cards/chess', grid: 'square', palette: 'medieval/bone', glow: 70, fade: 30 } },
+    { id: 'hatch', name: n('Engraver', 'Gravürcü'), s: { charSet: 'classic/hatch', palette: 'mono/sepia', glow: 0, fade: 20, vignette: 20 } },
+    { id: 'dice', name: n('Dice', 'Zarlar'), s: { charSet: 'cards/dice', grid: 'square', depth: 6, palette: 'crt/white', glow: 40, fade: 10 } }
   ];
+
+  /* gallery categories */
+  GF.LOOK_TAGS = [
+    { id: 'glow', name: n('Glow', 'Işıltı') },
+    { id: 'terminal', name: n('Terminal', 'Terminal') },
+    { id: 'medieval', name: n('Medieval', 'Ortaçağ') },
+    { id: 'print', name: n('Print', 'Baskı') },
+    { id: 'lines', name: n('Lines', 'Çizgi') },
+    { id: 'color', name: n('Colour', 'Renk') }
+  ];
+  const TAG = {
+    ember: 'glow', bone: 'glow', ice: 'glow', aurora: 'glow',
+    phosphor: 'terminal', amber: 'terminal', matrix: 'terminal', bayer: 'terminal', binary: 'terminal',
+    runes: 'medieval', cards: 'medieval', fraktur: 'medieval', chess: 'medieval',
+    dots: 'print', halftone: 'print', onebit: 'print', hatch: 'print', dice: 'print',
+    sketch: 'lines', edgefire: 'lines', blueprint: 'lines',
+    neon: 'color', synth: 'color', source: 'color', vapor: 'color', ocean: 'color'
+  };
+  GF.LOOKS.forEach((l) => (l.tag = TAG[l.id] || 'glow'));
 
   /* Values a look starts from, so every look is complete on its own. */
   GF.lookSettings = function (look) {
