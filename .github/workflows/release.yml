@@ -32,7 +32,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" release/*.exe release/SHA256SUMS.txt \
             --title "TLK ASCII $GITHUB_REF_NAME" \
