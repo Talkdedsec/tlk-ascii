@@ -147,3 +147,7 @@ Fonts, all under the SIL Open Font License 1.1 (licence texts in [`web/fonts`](w
 ## License
 
 [MIT](LICENSE) for the code. Fonts keep their own licence; the demo images are public domain or CC0.
+
+<p align="center">
+  <sub>Built by <a href="https://talkdedsec.com">Talkdedsec</a></sub>
+</p>

@@ -147,3 +147,7 @@ Fontlar, hepsi SIL Open Font License 1.1 altında (lisans metinleri [`web/fonts`
 ## Lisans
 
 Kod [MIT](LICENSE) lisanslıdır. Fontlar kendi lisanslarını korur; demo görselleri kamu malı veya CC0'dır.
+
+<p align="center">
+  <sub><a href="https://talkdedsec.com">Talkdedsec</a> tarafından yapıldı</sub>
+</p>
